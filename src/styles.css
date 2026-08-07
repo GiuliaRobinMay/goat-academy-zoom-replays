@@ -345,14 +345,6 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
   box-shadow: 0 2px 7px rgba(0, 0, 0, 0.35);
 }
 
-/* The cover art carries the title and date, and its colour carries the level,
-   so this is just a thin strip naming the coaches. */
-.card-body { padding: 8px 11px 9px; }
-.card-coach {
-  font-size: 12.5px; font-weight: 700; line-height: 1.35; letter-spacing: -0.1px;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-
 .card-meta { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .card-meta .sep { color: var(--faint); }
 

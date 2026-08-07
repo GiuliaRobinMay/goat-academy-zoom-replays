@@ -32,35 +32,39 @@ interface Props {
 }
 
 /**
- * Gallery view. The cover art carries the title and the date; its gradient
- * colour carries the level. That leaves the panel below it as a thin strip
- * naming the coaches, nothing more.
+ * Gallery view — the card is the artwork, nothing else. Date sits top left,
+ * title and coach are set into the art, and the gradient colour carries the
+ * level.
  */
 export function ReplayCard({ replay, watched, active, onOpen }: Props) {
   return (
     <button className="card" data-active={active} onClick={() => onOpen(replay)}>
       <div className="thumb">
-        <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
+        <GeneratedThumbnail
+          id={replay.id}
+          title={replay.title}
+          level={replay.level}
+          coach={coachNames(replay.coachIds)}
+        />
         <span className="badge-date">{formatDateBadge(replay.date)}</span>
         <span className="play"><Play size={18} /></span>
-        <span className="badge-time">{formatDuration(replay.durationMin)}</span>
         {watched && <span className="badge-watched" title="Watched"><Check size={13} /></span>}
-      </div>
-
-      <div className="card-body">
-        <div className="card-coach">{coachNames(replay.coachIds)}</div>
       </div>
     </button>
   )
 }
 
-/** List view — the thumbnail is too small to read, so the row keeps the title. */
+/** List view — the thumbnail is too small to read, so the row keeps the text. */
 export function ReplayRow({ replay, watched, active, onOpen }: Props) {
   return (
     <button className="row" data-active={active} onClick={() => onOpen(replay)}>
       <div className="row-thumb">
-        <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
-        <span className="badge-time">{formatDuration(replay.durationMin)}</span>
+        <GeneratedThumbnail
+          id={replay.id}
+          title={replay.title}
+          level={replay.level}
+          coach={coachNames(replay.coachIds)}
+        />
         {watched && (
           <span className="badge-watched" style={{ width: 19, height: 19, right: 5, top: 5 }} title="Watched">
             <Check size={11} />

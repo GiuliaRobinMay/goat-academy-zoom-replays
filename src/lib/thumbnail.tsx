@@ -80,14 +80,16 @@ interface Props {
   id: string
   title: string
   level: Level
+  /** Coach name(s), set smaller beneath the title. */
+  coach: string
 }
 
 /**
- * Only the title lives inside the SVG. Date, duration and the watched tick are
- * HTML overlays on top, so they stay a fixed size whether the artwork is a
- * 160px card or a full-width player.
+ * Title and coach live inside the SVG so they scale with the artwork. The date
+ * badge and watched tick are HTML overlays on top, so those stay a fixed size
+ * whether the artwork is a 160px card or a full-width player.
  */
-export function GeneratedThumbnail({ id, title, level }: Props) {
+export function GeneratedThumbnail({ id, title, level, coach }: Props) {
   const [deep, light] = GRADIENT[level]
   const rand = seeded(id)
 
@@ -100,8 +102,16 @@ export function GeneratedThumbnail({ id, title, level }: Props) {
   const byCount = lines.length >= 3 ? 46 : lines.length === 2 ? 54 : 62
   const fontSize = Math.max(22, Math.min(byCount, byWidth))
 
+  // Title block plus the coach line beneath it, centred as one group so cards
+  // with one-line and three-line titles still look balanced.
   const blockHeight = lines.length * fontSize * 1.06
-  const startY = 186 - blockHeight / 2 + fontSize * 0.8
+  // Floor of 30 keeps the coach readable once the artwork shrinks to card size;
+  // the width term stops long co-host lists running off the edge.
+  const coachSize = Math.min(Math.max(30, fontSize * 0.5), 548 / (coach.length * 0.56))
+  const coachGap = coachSize * 0.9
+  const groupTop = 200 - (blockHeight + coachGap + coachSize) / 2
+  const startY = groupTop + fontSize * 0.8
+  const coachY = groupTop + blockHeight + coachGap + coachSize * 0.8
 
   // Candlestick motif — seeded so each card is distinct but never changes.
   const candles = Array.from({ length: 14 }, (_, i) => {
@@ -155,6 +165,20 @@ export function GeneratedThumbnail({ id, title, level }: Props) {
           </text>
         ))}
       </g>
+
+      {/* coach line */}
+      <text
+        x="34"
+        y={coachY}
+        fill="#ffffff"
+        fillOpacity="0.82"
+        fontSize={coachSize}
+        fontWeight="600"
+        letterSpacing="0.3"
+        fontFamily="system-ui, -apple-system, Segoe UI, sans-serif"
+      >
+        {coach}
+      </text>
     </svg>
   )
 }
