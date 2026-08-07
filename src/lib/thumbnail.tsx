@@ -21,18 +21,22 @@ export const LEVEL_COLOR: Record<Level, string> = {
 }
 
 /**
- * The brand colour at full strength, shading to a deeper tone of the same hue
- * at the bottom left where the text sits. No overlay or scrim — the card is
- * saturated enough for its ink colour to read directly on it.
+ * One hue per level, running from a deep, fully opaque bottom-left corner —
+ * where the text sits — to a lighter, part-transparent top right. The
+ * transparency lets the card surface through, which is what gives the tile
+ * depth instead of reading as a solid slab of colour.
  *
  * `motif` is the chart pattern: white on the dark cards, near-black on yellow.
  */
-const ART: Record<Level, { from: string; to: string; motif: string; motifOpacity: number }> = {
-  beginner: { from: '#22a559', to: '#177c41', motif: '#ffffff', motifOpacity: 0.18 },
-  intermediate: { from: '#f4b400', to: '#c98f00', motif: '#3d2c00', motifOpacity: 0.16 },
-  advanced: { from: '#7c3aed', to: '#5a24bd', motif: '#ffffff', motifOpacity: 0.18 },
-  all: { from: '#0d6fd0', to: '#08549f', motif: '#ffffff', motifOpacity: 0.18 },
+const ART: Record<Level, { light: string; deep: string; motif: string; motifOpacity: number }> = {
+  beginner: { light: '#4fc47f', deep: '#14713b', motif: '#ffffff', motifOpacity: 0.18 },
+  intermediate: { light: '#ffce4d', deep: '#bf8c00', motif: '#3d2c00', motifOpacity: 0.16 },
+  advanced: { light: '#a274f5', deep: '#5620b4', motif: '#ffffff', motifOpacity: 0.18 },
+  all: { light: '#4a9ae6', deep: '#08498e', motif: '#ffffff', motifOpacity: 0.18 },
 }
+
+/** Opacity at the pale top-right end; the bottom-left end stays fully opaque. */
+const TOP_RIGHT_OPACITY = 0.5
 
 export const LEVEL_LABEL: Record<Level, string> = {
   beginner: 'BEGINNER',
@@ -64,7 +68,7 @@ interface Props {
 }
 
 export function GeneratedThumbnail({ id, level, title }: Props) {
-  const { from, to, motif, motifOpacity } = ART[level]
+  const { light, deep, motif, motifOpacity } = ART[level]
   const rand = seeded(id)
 
   const candles = Array.from({ length: 16 }, (_, i) => {
@@ -78,11 +82,12 @@ export function GeneratedThumbnail({ id, level, title }: Props) {
   return (
     <svg viewBox="0 0 640 360" className="thumb-svg" role="img" aria-label={title}>
       <defs>
-        {/* Brand colour at the top right, deepening toward the bottom left
-            where the title sits. */}
+        {/* Light and part-transparent at the top right, deepening to fully
+            opaque at the bottom left behind the title. */}
         <linearGradient id={gid} x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={from} />
-          <stop offset="100%" stopColor={to} />
+          <stop offset="0%" stopColor={light} stopOpacity={TOP_RIGHT_OPACITY} />
+          <stop offset="55%" stopColor={light} stopOpacity="0.88" />
+          <stop offset="100%" stopColor={deep} stopOpacity="1" />
         </linearGradient>
       </defs>
 
