@@ -1,6 +1,7 @@
 import type { Replay } from '../types'
 import { SESSIONS } from './sessions'
 import { RECAPS } from './recaps'
+import { ARTWORK } from './artwork'
 import { thumbnailFor } from '../lib/thumbnails'
 
 /**
@@ -52,6 +53,7 @@ function buildReplays(): Replay[] {
       if (day !== 0 && day !== 6) {
         const durationMin = 40 + Math.floor(rand() * 55)
         const entry = RECAPS[session.id]
+        const art = ARTWORK[session.id]
 
         out.push({
           id: `${session.id}-${isoDate(date)}`,
@@ -62,6 +64,8 @@ function buildReplays(): Replay[] {
           date: isoDate(date),
           durationMin,
           thumbnailUrl: thumbnailFor(session.id),
+          display: art?.display ?? session.title,
+          tagline: art?.tagline,
           recap: entry?.recap,
           // Chapter positions are stored as fractions, so they land inside
           // whatever length this particular recording turned out to be.

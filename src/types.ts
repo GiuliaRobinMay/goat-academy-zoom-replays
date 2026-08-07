@@ -38,6 +38,10 @@ export interface Replay {
   durationMin: number
   /** Cover art. Falls back to generated artwork when absent. */
   thumbnailUrl?: string
+  /** Short headline used on the cover art. */
+  display?: string
+  /** One-line description under the headline on the cover art. */
+  tagline?: string
   /** Short summary of what the session covered. */
   recap?: string
   /** Jump points, in order. */

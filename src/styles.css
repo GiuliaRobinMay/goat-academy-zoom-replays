@@ -448,7 +448,8 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
 .stage .overlay {
   position: absolute; inset: 0;
   display: grid; place-items: center; text-align: center; padding: 22px;
-  background: linear-gradient(180deg, rgba(4, 8, 14, 0.6), rgba(4, 8, 14, 0.84));
+  /* Light enough that the cover art still reads underneath. */
+  background: radial-gradient(70% 70% at 50% 50%, rgba(4, 8, 14, 0.72), rgba(4, 8, 14, 0.42));
 }
 .stage .overlay .big {
   width: 70px; height: 70px; border-radius: 50%;

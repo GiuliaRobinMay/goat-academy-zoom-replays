@@ -43,22 +43,22 @@ export function ReplayCard({ replay, watched, active, onOpen }: Props) {
         {replay.thumbnailUrl ? (
           <img src={replay.thumbnailUrl} alt={replay.title} loading="lazy" />
         ) : (
-          <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
+          <GeneratedThumbnail
+            id={replay.id}
+            title={replay.title}
+            level={replay.level}
+            display={replay.display ?? replay.title}
+            tagline={replay.tagline}
+            coach={coachNames(replay.coachIds)}
+          />
         )}
         <span className="play"><Play size={18} /></span>
         {watched && <span className="badge-watched" title="Watched"><Check size={13} /></span>}
 
-        {/* Date, then the title and coach as one label directly beneath it.
-            Real cover art carries its own text, so the label is only drawn
-            over generated artwork. */}
+        {/* The artwork carries the title, tagline and coaches, so only the
+            date rides on top of it. */}
         <div className="card-stack">
           <span className="badge-date">{formatDateBadge(replay.date)}</span>
-          {!replay.thumbnailUrl && (
-            <span className="card-label">
-              <span className="card-title">{replay.title}</span>
-              <span className="card-coach">{coachNames(replay.coachIds)}</span>
-            </span>
-          )}
         </div>
       </div>
     </button>
@@ -73,7 +73,14 @@ export function ReplayRow({ replay, watched, active, onOpen }: Props) {
         {replay.thumbnailUrl ? (
           <img src={replay.thumbnailUrl} alt={replay.title} loading="lazy" />
         ) : (
-          <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
+          <GeneratedThumbnail
+            id={replay.id}
+            title={replay.title}
+            level={replay.level}
+            display={replay.display ?? replay.title}
+            tagline={replay.tagline}
+            coach={coachNames(replay.coachIds)}
+          />
         )}
         {watched && (
           <span className="badge-watched" style={{ width: 19, height: 19, right: 5, top: 5 }} title="Watched">
