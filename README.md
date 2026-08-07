@@ -15,7 +15,7 @@ npm run build    # emits a single self-contained dist/index.html
 - **Two panes** — the replay list on the left, player and notes on the right,
   each scrolling independently, with a draggable splitter between them.
 - **Gallery and list views** for the left pane, toggled and remembered.
-- **Filters** — free-text search, coach, session (the Academy's 43 sessions,
+- **Filters** — free-text search, coach, session (the Academy's 41 sessions,
   grouped by level), level pills, and a calendar where only days that actually
   have replays are selectable.
 - **Player** with a full-view control; a replay is marked watched automatically
@@ -23,7 +23,7 @@ npm run build    # emits a single self-contained dist/index.html
 - **Notes** — per-replay, autosaving, plus a drawer listing every note written.
 - **Dark / light mode**, remembered between visits.
 
-Levels are colour-coded throughout: beginner green, intermediate amber,
+Levels are colour-coded throughout: beginner green, intermediate gold,
 advanced purple, all-levels blue.
 
 ## Admin zone
