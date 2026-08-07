@@ -16,9 +16,9 @@ import { GridIcon, ListIcon, Moon, NotesIcon, Sun } from './components/Icons'
 const monthLabel = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 
-const MIN_LEFT = 300
-const MAX_LEFT = 720
-const DEFAULT_LEFT = 420
+const MIN_LEFT = 320
+const MAX_LEFT = 900
+const DEFAULT_LEFT = 600
 
 export default function App() {
   const [replays, setReplays] = useState<Replay[]>([])

@@ -11,7 +11,7 @@ const KEY = {
   notes: 'goat.replays.notes',
   theme: 'goat.replays.theme',
   view: 'goat.replays.view',
-  leftWidth: 'goat.replays.leftWidth',
+  leftWidth: 'goat.replays.leftWidth.v2',
 } as const
 
 function read<T>(key: string, fallback: T): T {
@@ -47,5 +47,5 @@ export const loadView = () => read<ViewMode>(KEY.view, 'grid')
 export const saveView = (view: ViewMode) => write(KEY.view, view)
 
 /** Width of the replay list column, in px. */
-export const loadLeftWidth = () => read<number>(KEY.leftWidth, 420)
+export const loadLeftWidth = () => read<number>(KEY.leftWidth, 600)
 export const saveLeftWidth = (px: number) => write(KEY.leftWidth, px)
