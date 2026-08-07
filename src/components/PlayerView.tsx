@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Replay } from '../types'
 import { coachNames } from '../data/coaches'
 import { GeneratedThumbnail, LEVEL_LABEL } from '../lib/thumbnail'
@@ -17,9 +17,34 @@ interface Props {
 /** Treat a replay as watched once most of it has played. */
 const WATCHED_AT = 0.9
 
+/** mm:ss, or h:mm:ss once past the hour. */
+const stamp = (seconds: number) => {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    : `${m}:${String(s).padStart(2, '0')}`
+}
+
 export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: Props) {
   const coaches = coachNames(replay.coachIds)
   const [maximised, setMaximised] = useState(false)
+  const [activeChapter, setActiveChapter] = useState<number | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Selecting a chapter jumps the recording; with no video attached yet it
+  // just marks the row so the interaction is still visible.
+  const seekTo = (seconds: number, index: number) => {
+    setActiveChapter(index)
+    const el = videoRef.current
+    if (el) {
+      el.currentTime = seconds
+      void el.play().catch(() => {})
+    }
+  }
+
+  useEffect(() => setActiveChapter(null), [replay.id])
 
   useEffect(() => {
     if (!maximised) return
@@ -51,6 +76,7 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
             // Once the backend proxy is live this is the real MP4 stream.
             // Watching most of it is what marks the replay as watched.
             <video
+              ref={videoRef}
               src={replay.videoUrl}
               controls
               playsInline
@@ -99,6 +125,40 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
           </div>
         )}
       </div>
+
+      {(replay.recap || replay.chapters?.length) && (
+        <div className="panel panel-pad">
+          {replay.recap && (
+            <>
+              <h3 className="section-label">Recap</h3>
+              <p className="recap">{replay.recap}</p>
+            </>
+          )}
+
+          {replay.chapters && replay.chapters.length > 0 && (
+            <>
+              <h3 className="section-label" style={{ marginTop: replay.recap ? 20 : 0 }}>
+                In this session
+              </h3>
+              <ol className="chapters">
+                {replay.chapters.map((chapter, i) => (
+                  <li key={chapter.at}>
+                    <button
+                      className="chapter"
+                      data-on={activeChapter === i}
+                      onClick={() => seekTo(chapter.at, i)}
+                      title={`Jump to ${stamp(chapter.at)}`}
+                    >
+                      <span className="chapter-at">{stamp(chapter.at)}</span>
+                      <span className="chapter-label">{chapter.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="panel">
         <NotesEditor value={note} onChange={(v) => onNoteChange(replay.id, v)} />

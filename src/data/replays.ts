@@ -1,5 +1,7 @@
 import type { Replay } from '../types'
 import { SESSIONS } from './sessions'
+import { RECAPS } from './recaps'
+import { thumbnailFor } from '../lib/thumbnails'
 
 /**
  * Placeholder replay history.
@@ -48,6 +50,9 @@ function buildReplays(): Replay[] {
       // Sessions run on weekdays.
       const day = date.getUTCDay()
       if (day !== 0 && day !== 6) {
+        const durationMin = 40 + Math.floor(rand() * 55)
+        const entry = RECAPS[session.id]
+
         out.push({
           id: `${session.id}-${isoDate(date)}`,
           sessionId: session.id,
@@ -55,7 +60,15 @@ function buildReplays(): Replay[] {
           level: session.level,
           coachIds: session.coachIds,
           date: isoDate(date),
-          durationMin: 40 + Math.floor(rand() * 55),
+          durationMin,
+          thumbnailUrl: thumbnailFor(session.id),
+          recap: entry?.recap,
+          // Chapter positions are stored as fractions, so they land inside
+          // whatever length this particular recording turned out to be.
+          chapters: entry?.chapters.map((c) => ({
+            at: Math.round(c.at * durationMin * 60),
+            label: c.label,
+          })),
         })
       }
       offset += session.cadenceDays

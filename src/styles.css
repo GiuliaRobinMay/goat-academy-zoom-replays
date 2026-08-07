@@ -488,6 +488,33 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
   font-size: 13px; color: var(--text); font-family: ui-monospace, monospace;
 }
 
+/* ── Recap and chapters ───────────────────────────────────────────────── */
+
+.section-label {
+  margin: 0 0 9px;
+  font-size: 11.5px; font-weight: 800; letter-spacing: 1.1px;
+  text-transform: uppercase; color: var(--accent);
+}
+.recap { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--text); max-width: 68ch; }
+
+.chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.chapter {
+  width: 100%;
+  display: grid; grid-template-columns: 62px 1fr; gap: 12px; align-items: baseline;
+  padding: 8px 10px;
+  border: 1px solid transparent; border-radius: 9px;
+  background: none; text-align: left;
+  transition: background 0.14s, border-color 0.14s;
+}
+.chapter:hover { background: var(--panel-2); border-color: var(--border); }
+.chapter[data-on='true'] { background: var(--accent-soft); border-color: var(--accent); }
+.chapter-at {
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.chapter-label { font-size: 14px; color: var(--text); line-height: 1.45; }
+
 /* ── Notes ────────────────────────────────────────────────────────────── */
 
 .notes-head {

@@ -64,12 +64,30 @@ Levels don't exist in Zoom's API — match the meeting `topic` against
 
 ## Thumbnails
 
-Zoom returns no thumbnail for a recording, so `src/lib/thumbnail.tsx` composes
-one per replay: level colour, the title set large, the coach, and a chart motif
-seeded from the replay id so each card is distinct but stable across reloads.
+Drop cover art into **`src/assets/thumbs/`** and it is picked up at build time —
+no code change. Files are assigned to sessions in filename order, so a session
+keeps the same image across all of its recordings. See the README in that folder
+for sizing guidance.
 
-To use real artwork instead, add a `thumbnailUrl` to `Replay` and render an
-`<img>` in `ReplayCard` when it's present.
+Resize before committing: the build inlines every asset into one HTML file, so
+full-size 2MB PNGs bloat it badly. 640px wide at ~78% quality is plenty.
+
+Any session with no image falls back to generated artwork
+(`src/lib/thumbnail.tsx`) — a level-coloured gradient with the title and coaches
+drawn over it. Cards using real artwork drop that text overlay, on the
+assumption the artwork already carries it.
+
+## Recap and chapters
+
+`src/data/recaps.ts` holds a recap and a set of chapter markers per session.
+Chapter positions are stored as a **fraction** of the recording rather than
+absolute seconds, because a session runs a different length each week; the
+fraction is converted to a real timestamp per recording. Clicking a chapter
+seeks the player.
+
+These are written placeholders. Once Zoom is connected the recap should come
+from the meeting summary and the chapters from the transcript (VTT), with this
+file left as the fallback for recordings that have neither.
 
 ## Per-member state
 

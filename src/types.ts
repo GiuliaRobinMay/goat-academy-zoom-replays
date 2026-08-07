@@ -19,6 +19,13 @@ export interface Session {
   cadenceDays: number
 }
 
+/** A jump point inside a recording. */
+export interface Chapter {
+  /** Seconds from the start of the recording. */
+  at: number
+  label: string
+}
+
 /** One actual recorded occurrence of a session — this is what a card represents. */
 export interface Replay {
   id: string
@@ -29,6 +36,12 @@ export interface Replay {
   /** ISO date (yyyy-mm-dd) the session was recorded. */
   date: string
   durationMin: number
+  /** Cover art. Falls back to generated artwork when absent. */
+  thumbnailUrl?: string
+  /** Short summary of what the session covered. */
+  recap?: string
+  /** Jump points, in order. */
+  chapters?: Chapter[]
   /**
    * Populated by the backend once Zoom is connected.
    * `videoUrl` streams through our own proxy; `shareUrl`/`passcode` are the
