@@ -39,9 +39,7 @@ interface Palette {
 
 const PALETTE: Record<Level, Palette> = {
   beginner: { near: '#07301e', far: '#03130c', accent: '#4fd39c', node: '#1d7a51', area: '#0e4b2e' },
-  // A dark yellow reads as brown, so this one sits on a warm charcoal and lets
-  // the gold accent carry the level instead.
-  intermediate: { near: '#2a2313', far: '#121009', accent: '#f4b400', node: '#8f7118', area: '#3a301a' },
+  intermediate: { near: '#3d2d05', far: '#171003', accent: '#f4b400', node: '#a07c10', area: '#4a3708' },
   advanced: { near: '#241544', far: '#100820', accent: '#a98cf7', node: '#57309b', area: '#301d55' },
   all: { near: '#0b2a4a', far: '#041424', accent: '#5cb0ee', node: '#1e5f96', area: '#10406b' },
 }
@@ -84,8 +82,8 @@ const DISPLAY_FONT = "'Arial Narrow', 'Helvetica Neue', Helvetica, Arial, sans-s
 const BODY_FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
 
 const PAD_X = 128
-/** Type column. The motif lives to the right of this and behind the tagline. */
-const TYPE_WIDTH = 1120
+/** Type runs most of the frame; the motif sits clear to its right. */
+const TYPE_WIDTH = 1560
 
 interface Props {
   id: string
@@ -105,14 +103,17 @@ export function GeneratedThumbnail({ id, level, display, tagline, coach, title }
   const rand = seeded(id)
   const uid = `t-${id.replace(/[^a-z0-9]/gi, '')}`
 
-  const lines = wrap(display.toUpperCase(), 15, 2)
+  const lines = wrap(display.toUpperCase(), 14, 2)
   const longest = Math.max(...lines.map((l) => l.length), 1)
-  const headSize = Math.max(58, Math.min(120, TYPE_WIDTH / (longest * 0.52)))
-  const headLead = headSize * 0.9
-  const headTop = 476
+  // Two-line headlines get a smaller cap so the tagline and the "WITH" line
+  // still clear each other inside the frame.
+  const maxHead = lines.length === 2 ? 150 : 200
+  const headSize = Math.max(80, Math.min(maxHead, TYPE_WIDTH / (longest * 0.52)))
+  const headLead = headSize * 0.88
+  const headTop = lines.length === 2 ? 470 : 520
 
-  const tagLines = tagline ? wrap(tagline, 32, 2) : []
-  const tagTop = headTop + (lines.length - 1) * headLead + 112
+  const tagLines = tagline ? wrap(tagline, 38, 2) : []
+  const tagTop = headTop + (lines.length - 1) * headLead + 122
 
   // Contour lines drifting across the whole ground, as in the designed series.
   const contours = Array.from({ length: 7 }, (_, row) => {
@@ -139,8 +140,8 @@ export function GeneratedThumbnail({ id, level, display, tagline, coach, title }
 
   // The hero line: a chart sweeping through the right half.
   const points = Array.from({ length: 5 }, (_, i) => ({
-    x: 1180 + i * 158,
-    y: 740 - rand() * 250,
+    x: 1250 + i * 145,
+    y: 700 - rand() * 250,
   }))
 
   return (
@@ -189,10 +190,10 @@ export function GeneratedThumbnail({ id, level, display, tagline, coach, title }
       <rect width="1920" height="1080" fill={`url(#${uid}-veil)`} />
 
       {/* eyebrow */}
-      <text x={PAD_X} y="322" fill={p.accent} fontSize="36" fontWeight="800" letterSpacing="7.5" fontFamily={BODY_FONT}>
+      <text x={PAD_X} y="308" fill={p.accent} fontSize="50" fontWeight="800" letterSpacing="9" fontFamily={BODY_FONT}>
         {LEVEL_LABEL[level]}
       </text>
-      <rect x={PAD_X} y="344" width="112" height="6" fill={p.accent} />
+      <rect x={PAD_X} y="338" width="150" height="8" fill={p.accent} />
 
       {/* Headline. `textLength` pins each line to a condensed target width, so
           it stays condensed and inside the column even where no narrow face is
@@ -213,15 +214,15 @@ export function GeneratedThumbnail({ id, level, display, tagline, coach, title }
       </g>
 
       {/* tagline */}
-      <g fontFamily={BODY_FONT} fill="#ccd8e4" fontSize="40">
+      <g fontFamily={BODY_FONT} fill="#d2dde8" fontSize="58">
         {tagLines.map((line, i) => (
-          <text key={i} x={PAD_X} y={tagTop + i * 54}>{line}</text>
+          <text key={i} x={PAD_X} y={tagTop + i * 70}>{line}</text>
         ))}
       </g>
 
       {/* with … */}
       {coach && (
-        <text x={PAD_X} y="924" fill="#ffffff" fontSize="40" fontWeight="800" letterSpacing="1.5" fontFamily={BODY_FONT}>
+        <text x={PAD_X} y="962" fill="#ffffff" fontSize="56" fontWeight="800" letterSpacing="2" fontFamily={BODY_FONT}>
           {`WITH ${coach.toUpperCase()}`}
         </text>
       )}

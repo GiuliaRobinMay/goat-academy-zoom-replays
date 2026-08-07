@@ -3,7 +3,7 @@ import type { Replay } from '../types'
 import { coachNames } from '../data/coaches'
 import { GeneratedThumbnail, LEVEL_LABEL } from '../lib/thumbnail'
 import { NotesEditor } from './NotesEditor'
-import { Check, External, Maximize, Minimize, Play } from './Icons'
+import { Check, External, Maximize, Minimize } from './Icons'
 import { formatDate, formatDuration } from './ReplayCard'
 
 interface Props {
@@ -97,7 +97,6 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
               </div>
               <div className="overlay">
                 <div>
-                  <div className="big"><Play size={24} /></div>
                   <p>
                     The recording streams here once the Zoom connection is live. The player
                     and notes around it are already wired up.

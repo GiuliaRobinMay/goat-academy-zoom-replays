@@ -1,7 +1,7 @@
 import type { Replay } from '../types'
 import { coachNames } from '../data/coaches'
 import { GeneratedThumbnail, LEVEL_LABEL } from '../lib/thumbnail'
-import { Check, Play } from './Icons'
+import { Check } from './Icons'
 
 /**
  * US order, weekday first, no year — the library only holds a rolling window
@@ -52,7 +52,6 @@ export function ReplayCard({ replay, watched, active, onOpen }: Props) {
             coach={coachNames(replay.coachIds)}
           />
         )}
-        <span className="play"><Play size={18} /></span>
         {watched && <span className="badge-watched" title="Watched"><Check size={13} /></span>}
 
         {/* The artwork carries the title, tagline and coaches, so only the
