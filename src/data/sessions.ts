@@ -2,8 +2,8 @@ import type { Level, Session } from '../types'
 
 /**
  * The Academy's full session list, transcribed from the session overview and
- * grouped by the level each session is classified under. 43 sessions total:
- * 11 all-levels, 17 beginner, 14 intermediate, 1 advanced.
+ * grouped by the level each session is classified under. 41 sessions total:
+ * 10 all-levels, 16 beginner, 14 intermediate, 1 advanced.
  *
  * Coach and cadence are the only invented fields — Zoom supplies the real host
  * and dates once connected. Titles and levels are exactly as given.
@@ -14,7 +14,6 @@ export const SESSIONS: Session[] = [
   { id: 'midweek-markets', title: 'Mid-week Markets Update and Q&A', level: 'all', coachId: 'patrick', cadenceDays: 7 },
   { id: 'weekly-recap', title: 'Weekly Recap · BK / Patrick', level: 'all', coachId: 'byung-kim', cadenceDays: 7 },
   { id: 'markets-investment-discussion', title: 'Markets and Investment Discussion', level: 'all', coachId: 'brett', cadenceDays: 14 },
-  { id: 'global-economic-outlook', title: 'Global Economic Outlook with Jesús', level: 'all', coachId: 'jesus', cadenceDays: 14 },
   { id: 'market-psychology', title: 'Market Psychology + Q&A', level: 'all', coachId: 'juri', cadenceDays: 21 },
   { id: 'wsp-qa-investing', title: '(WSP) Q&A (Investing)', level: 'all', coachId: 'mark-putrino', cadenceDays: 14 },
   { id: 'topic-of-the-week', title: 'Topic of the Week (Investing)', level: 'all', coachId: 'dominic', cadenceDays: 7 },
@@ -31,7 +30,6 @@ export const SESSIONS: Session[] = [
   { id: 'success-path-1', title: 'Trading Success Path · Phase 1', level: 'beginner', coachId: 'troy', cadenceDays: 28 },
   { id: 'basics-to-investing', title: 'Basics to Investing · Concepts & Principles', level: 'beginner', coachId: 'mike-muryn', cadenceDays: 21 },
   { id: 'investing-intro', title: '(Investing) Intro · Investing Fundamentals', level: 'beginner', coachId: 'tonino', cadenceDays: 28 },
-  { id: 'jesus-charting', title: "Jesús' Weekly Charting Session", level: 'beginner', coachId: 'jesus', cadenceDays: 7 },
   { id: 'wsp-stop-loss', title: '(WSP) Stop Loss Workshop', level: 'beginner', coachId: 'elliott', cadenceDays: 21 },
   { id: 'risk-management-beginners', title: 'Risk Management for Beginners', level: 'beginner', coachId: 'daniel-ayala', cadenceDays: 21 },
   { id: 'wsp-large-lists', title: '(WSP) On Keeping Track of Large Lists', level: 'beginner', coachId: 'carlos', cadenceDays: 28 },

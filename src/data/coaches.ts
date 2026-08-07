@@ -18,7 +18,6 @@ export const COACHES: Coach[] = [
   { id: 'daniel-ayala', name: 'Daniel Ayala Jr.', levels: ['beginner', 'advanced'] },
 
   // Intermediate + Advanced
-  { id: 'jesus', name: 'Jesús', levels: ['intermediate', 'advanced'] },
   { id: 'jea-yu', name: 'Jea Yu', levels: ['intermediate', 'advanced'] },
   { id: 'mark-putrino', name: 'Mark Putrino', levels: ['intermediate', 'advanced'] },
   { id: 'patrick', name: 'Patrick', levels: ['intermediate', 'advanced'] },
