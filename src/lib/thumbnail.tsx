@@ -20,12 +20,16 @@ export const LEVEL_COLOR: Record<Level, string> = {
   all: '#3b82f6',
 }
 
-/** Deep-to-light pair per level, bright enough that cards read as artwork. */
+/**
+ * Deep-to-light pair per level, softened so the card reads as a tint rather
+ * than a solid block. The deep end is painted at the bottom left, under the
+ * title, and the pale end at the top right.
+ */
 const GRADIENT: Record<Level, [string, string]> = {
-  beginner: ['#047857', '#5eead4'],
-  intermediate: ['#b45309', '#fcd34d'],
-  advanced: ['#6d28d9', '#c4b5fd'],
-  all: ['#1d4ed8', '#93c5fd'],
+  beginner: ['#0d9488', '#a7f3d0'],
+  intermediate: ['#ca8a04', '#fef08a'],
+  advanced: ['#7c3aed', '#e2d5fb'],
+  all: ['#2563eb', '#c3dafe'],
 }
 
 export const LEVEL_LABEL: Record<Level, string> = {
@@ -72,13 +76,17 @@ export function GeneratedThumbnail({ id, level, title }: Props) {
   return (
     <svg viewBox="0 0 640 360" className="thumb-svg" role="img" aria-label={title}>
       <defs>
-        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={deep} />
-          <stop offset="100%" stopColor={light} />
+        {/* Pale at the top right, deep at the bottom left — so the corner the
+            title sits in is the darkest part of the artwork. */}
+        <linearGradient id={gid} x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={light} />
+          <stop offset="100%" stopColor={deep} />
         </linearGradient>
       </defs>
 
-      <rect width="640" height="360" fill={`url(#${gid})`} />
+      {/* Slightly translucent so the card reads as a tint over the surface
+          beneath it, leaving the level hairline to do the colour-coding. */}
+      <rect width="640" height="360" fill={`url(#${gid})`} opacity="0.82" />
 
       <g opacity="0.26">
         {candles.map((c, i) => (

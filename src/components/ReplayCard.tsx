@@ -38,7 +38,7 @@ interface Props {
  */
 export function ReplayCard({ replay, watched, active, onOpen }: Props) {
   return (
-    <button className="card" data-active={active} onClick={() => onOpen(replay)}>
+    <button className="card" data-level={replay.level} data-active={active} onClick={() => onOpen(replay)}>
       <div className="thumb">
         <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
         <span className="badge-date">{formatDateBadge(replay.date)}</span>
