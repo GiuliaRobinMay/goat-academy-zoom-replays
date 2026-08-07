@@ -309,6 +309,30 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
 .thumb { position: relative; aspect-ratio: 16 / 9; background: #0d1117; overflow: hidden; }
 .thumb-svg, .thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
+/* Title and coach as fixed-size HTML, anchored to the bottom of the artwork.
+   `max-height` reserves the top strip so text can never reach the date badge,
+   and the sizes are literal px so every card matches regardless of width. */
+.card-overlay {
+  /* Starts below the date badge and runs to the bottom edge, with the text
+     bottom-aligned inside it — so the title can never touch the badge, and
+     the gradient still has room to fade out. */
+  position: absolute; left: 0; right: 0; top: 32px; bottom: 0;
+  padding: 8px 11px 9px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 3px;
+  overflow: hidden;
+  background: linear-gradient(to top, rgba(2, 8, 16, 0.86) 0%, rgba(2, 8, 16, 0.58) 52%, rgba(2, 8, 16, 0) 100%);
+}
+.card-title {
+  font-size: 12px; font-weight: 800; line-height: 1.3;
+  letter-spacing: 0.2px; text-transform: uppercase; color: #fff;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-coach {
+  font-size: 11px; font-weight: 600; line-height: 1.3;
+  color: rgba(255, 255, 255, 0.85);
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+
 .thumb .play {
   position: absolute; inset: 0; margin: auto;
   width: 46px; height: 46px; border-radius: 50%;

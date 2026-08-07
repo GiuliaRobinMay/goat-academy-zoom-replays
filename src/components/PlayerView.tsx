@@ -60,12 +60,7 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
           ) : (
             <>
               <div className="placeholder">
-                <GeneratedThumbnail
-                  id={replay.id}
-                  title={replay.title}
-                  level={replay.level}
-                  coach={coaches}
-                />
+                <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
               </div>
               <div className="overlay">
                 <div>

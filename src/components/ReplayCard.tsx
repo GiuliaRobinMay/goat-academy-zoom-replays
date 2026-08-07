@@ -40,15 +40,14 @@ export function ReplayCard({ replay, watched, active, onOpen }: Props) {
   return (
     <button className="card" data-active={active} onClick={() => onOpen(replay)}>
       <div className="thumb">
-        <GeneratedThumbnail
-          id={replay.id}
-          title={replay.title}
-          level={replay.level}
-          coach={coachNames(replay.coachIds)}
-        />
+        <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
         <span className="badge-date">{formatDateBadge(replay.date)}</span>
         <span className="play"><Play size={18} /></span>
         {watched && <span className="badge-watched" title="Watched"><Check size={13} /></span>}
+        <div className="card-overlay">
+          <div className="card-title">{replay.title}</div>
+          <div className="card-coach">{coachNames(replay.coachIds)}</div>
+        </div>
       </div>
     </button>
   )
@@ -59,12 +58,7 @@ export function ReplayRow({ replay, watched, active, onOpen }: Props) {
   return (
     <button className="row" data-active={active} onClick={() => onOpen(replay)}>
       <div className="row-thumb">
-        <GeneratedThumbnail
-          id={replay.id}
-          title={replay.title}
-          level={replay.level}
-          coach={coachNames(replay.coachIds)}
-        />
+        <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
         {watched && (
           <span className="badge-watched" style={{ width: 19, height: 19, right: 5, top: 5 }} title="Watched">
             <Check size={11} />

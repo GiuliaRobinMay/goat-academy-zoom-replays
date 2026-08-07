@@ -5,10 +5,12 @@ import type { Level } from '../types'
  *
  * Zoom does not hand back a thumbnail for a cloud recording, so rather than
  * showing 40 identical grey rectangles we compose one per session: a bright
- * level-coloured gradient, the title set large, and a chart motif seeded from
- * the replay id so every card looks distinct but stable. Drop-in replaceable
- * with real artwork — `ReplayCard` uses an <img> when a replay has a
- * `thumbnailUrl`.
+ * level-coloured gradient plus a chart motif seeded from the replay id, so
+ * every card looks distinct but stable across reloads.
+ *
+ * Deliberately text-free. Anything readable — date, title, coach — is an HTML
+ * overlay on top, because SVG text scales with its container and would render
+ * at a different size on a 160px card than on a full-width player.
  */
 
 export const LEVEL_COLOR: Record<Level, string> = {
@@ -18,8 +20,7 @@ export const LEVEL_COLOR: Record<Level, string> = {
   all: '#3b82f6',
 }
 
-/** Deep-to-light pair per level. Bright enough that cards read as artwork
- *  rather than black boxes, dark enough at the left for white text. */
+/** Deep-to-light pair per level, bright enough that cards read as artwork. */
 const GRADIENT: Record<Level, [string, string]> = {
   beginner: ['#047857', '#5eead4'],
   intermediate: ['#b45309', '#fcd34d'],
@@ -49,75 +50,21 @@ function seeded(seed: string) {
   }
 }
 
-/** Greedy word wrap, capped at `maxLines` with an ellipsis on overflow. */
-function wrap(text: string, maxChars: number, maxLines: number): string[] {
-  const words = text.split(/\s+/)
-  const lines: string[] = []
-  let line = ''
-
-  for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word
-    if (candidate.length <= maxChars) {
-      line = candidate
-    } else {
-      if (line) lines.push(line)
-      line = word
-      if (lines.length === maxLines) break
-    }
-  }
-  if (line && lines.length < maxLines) lines.push(line)
-
-  if (lines.length === maxLines) {
-    const consumed = lines.join(' ').split(/\s+/).length
-    if (consumed < words.length) {
-      lines[maxLines - 1] = lines[maxLines - 1].replace(/[\s·:,-]+$/, '') + '…'
-    }
-  }
-  return lines
-}
-
 interface Props {
   id: string
-  title: string
   level: Level
-  /** Coach name(s), set smaller beneath the title. */
-  coach: string
+  /** Only used for the accessible name. */
+  title: string
 }
 
-/**
- * Title and coach live inside the SVG so they scale with the artwork. The date
- * badge and watched tick are HTML overlays on top, so those stay a fixed size
- * whether the artwork is a 160px card or a full-width player.
- */
-export function GeneratedThumbnail({ id, title, level, coach }: Props) {
+export function GeneratedThumbnail({ id, level, title }: Props) {
   const [deep, light] = GRADIENT[level]
   const rand = seeded(id)
 
-  const lines = wrap(title.toUpperCase(), 20, 3)
-
-  // Shrink to fit: bold system caps run ~0.64em wide, and we have 548px of safe
-  // width from the left inset. Without this, long titles bleed off the card.
-  const longest = Math.max(...lines.map((l) => l.length), 1)
-  const byWidth = 548 / (longest * 0.64)
-  const byCount = lines.length >= 3 ? 46 : lines.length === 2 ? 54 : 62
-  const fontSize = Math.max(22, Math.min(byCount, byWidth))
-
-  // Title block plus the coach line beneath it, centred as one group so cards
-  // with one-line and three-line titles still look balanced.
-  const blockHeight = lines.length * fontSize * 1.06
-  // Floor of 30 keeps the coach readable once the artwork shrinks to card size;
-  // the width term stops long co-host lists running off the edge.
-  const coachSize = Math.min(Math.max(30, fontSize * 0.5), 548 / (coach.length * 0.56))
-  const coachGap = coachSize * 0.9
-  const groupTop = 200 - (blockHeight + coachGap + coachSize) / 2
-  const startY = groupTop + fontSize * 0.8
-  const coachY = groupTop + blockHeight + coachGap + coachSize * 0.8
-
-  // Candlestick motif — seeded so each card is distinct but never changes.
-  const candles = Array.from({ length: 14 }, (_, i) => {
-    const h = 26 + rand() * 92
-    const y = 214 - h * (0.35 + rand() * 0.5)
-    return { x: 408 + i * 17, y, h }
+  const candles = Array.from({ length: 16 }, (_, i) => {
+    const h = 30 + rand() * 110
+    const y = 250 - h * (0.3 + rand() * 0.55)
+    return { x: 22 + i * 39, y, h }
   })
 
   const gid = `g-${id.replace(/[^a-z0-9]/gi, '')}`
@@ -129,56 +76,18 @@ export function GeneratedThumbnail({ id, title, level, coach }: Props) {
           <stop offset="0%" stopColor={deep} />
           <stop offset="100%" stopColor={light} />
         </linearGradient>
-        {/* Keeps white text legible over the lighter end of the gradient. */}
-        <linearGradient id={`${gid}-scrim`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#04121e" stopOpacity="0.42" />
-          <stop offset="72%" stopColor="#04121e" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#04121e" stopOpacity="0" />
-        </linearGradient>
       </defs>
 
       <rect width="640" height="360" fill={`url(#${gid})`} />
 
-      <g opacity="0.32">
+      <g opacity="0.26">
         {candles.map((c, i) => (
           <g key={i}>
-            <rect x={c.x} y={c.y} width="9" height={c.h} rx="2" fill="#ffffff" />
-            <rect x={c.x + 3.5} y={c.y - 9} width="2" height={c.h + 18} rx="1" fill="#ffffff" opacity="0.7" />
+            <rect x={c.x} y={c.y} width="15" height={c.h} rx="3" fill="#ffffff" />
+            <rect x={c.x + 6} y={c.y - 14} width="3" height={c.h + 28} rx="1.5" fill="#ffffff" opacity="0.7" />
           </g>
         ))}
       </g>
-
-      <rect width="640" height="360" fill={`url(#${gid}-scrim)`} />
-
-      {/* title — the level is carried by the gradient colour */}
-      <g fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontWeight="800">
-        {lines.map((line, i) => (
-          <text
-            key={i}
-            x="34"
-            y={startY + i * fontSize * 1.06}
-            fill="#ffffff"
-            fontSize={fontSize}
-            letterSpacing="-0.5"
-          >
-            {line}
-          </text>
-        ))}
-      </g>
-
-      {/* coach line */}
-      <text
-        x="34"
-        y={coachY}
-        fill="#ffffff"
-        fillOpacity="0.82"
-        fontSize={coachSize}
-        fontWeight="600"
-        letterSpacing="0.3"
-        fontFamily="system-ui, -apple-system, Segoe UI, sans-serif"
-      >
-        {coach}
-      </text>
     </svg>
   )
 }
