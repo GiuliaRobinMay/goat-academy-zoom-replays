@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Replay } from './types'
 import { fetchReplays } from './lib/api'
-import { coachName } from './data/coaches'
+import { coachNames } from './data/coaches'
 import {
   loadLeftWidth, loadNotes, loadTheme, loadView, loadWatched,
   saveLeftWidth, saveNotes, saveTheme, saveView, saveWatched,
@@ -82,12 +82,12 @@ export default function App() {
     const q = filters.query.trim().toLowerCase()
 
     return replays.filter((r) => {
-      if (filters.coachId && r.coachId !== filters.coachId) return false
+      if (filters.coachId && !r.coachIds.includes(filters.coachId)) return false
       if (filters.sessionId && r.sessionId !== filters.sessionId) return false
       if (filters.levels.length && !filters.levels.includes(r.level)) return false
       if (filters.date && r.date !== filters.date) return false
       if (filters.unwatchedOnly && watched.has(r.id)) return false
-      if (q && !`${r.title} ${coachName(r.coachId)} ${r.level}`.toLowerCase().includes(q)) return false
+      if (q && !`${r.title} ${coachNames(r.coachIds)} ${r.level}`.toLowerCase().includes(q)) return false
       return true
     })
   }, [replays, filters, watched])

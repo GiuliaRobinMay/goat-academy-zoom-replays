@@ -4,10 +4,11 @@ import type { Level } from '../types'
  * Generated cover art for a replay.
  *
  * Zoom does not hand back a thumbnail for a cloud recording, so rather than
- * showing 40 identical grey rectangles we compose one per session: level colour,
- * the title set large, the coach, and a chart motif seeded from the replay id so
- * every card looks distinct but stable. Drop-in replaceable with real artwork —
- * `ReplayCard` will use an <img> whenever a replay has a `thumbnailUrl`.
+ * showing 40 identical grey rectangles we compose one per session: a bright
+ * level-coloured gradient, the title set large, and a chart motif seeded from
+ * the replay id so every card looks distinct but stable. Drop-in replaceable
+ * with real artwork — `ReplayCard` uses an <img> when a replay has a
+ * `thumbnailUrl`.
  */
 
 export const LEVEL_COLOR: Record<Level, string> = {
@@ -15,6 +16,15 @@ export const LEVEL_COLOR: Record<Level, string> = {
   intermediate: '#f59e0b',
   advanced: '#a855f7',
   all: '#3b82f6',
+}
+
+/** Deep-to-light pair per level. Bright enough that cards read as artwork
+ *  rather than black boxes, dark enough at the left for white text. */
+const GRADIENT: Record<Level, [string, string]> = {
+  beginner: ['#047857', '#5eead4'],
+  intermediate: ['#b45309', '#fcd34d'],
+  advanced: ['#6d28d9', '#c4b5fd'],
+  all: ['#1d4ed8', '#93c5fd'],
 }
 
 export const LEVEL_LABEL: Record<Level, string> = {
@@ -70,11 +80,10 @@ interface Props {
   id: string
   title: string
   level: Level
-  coach: string
 }
 
-export function GeneratedThumbnail({ id, title, level, coach }: Props) {
-  const color = LEVEL_COLOR[level]
+export function GeneratedThumbnail({ id, title, level }: Props) {
+  const [deep, light] = GRADIENT[level]
   const rand = seeded(id)
 
   const lines = wrap(title.toUpperCase(), 20, 3)
@@ -87,13 +96,13 @@ export function GeneratedThumbnail({ id, title, level, coach }: Props) {
   const fontSize = Math.max(22, Math.min(byCount, byWidth))
 
   const blockHeight = lines.length * fontSize * 1.06
-  const startY = 186 - blockHeight / 2 + fontSize * 0.8
+  const startY = 196 - blockHeight / 2 + fontSize * 0.8
 
   // Candlestick motif — seeded so each card is distinct but never changes.
   const candles = Array.from({ length: 14 }, (_, i) => {
     const h = 26 + rand() * 92
-    const y = 210 - h * (0.35 + rand() * 0.5)
-    return { x: 408 + i * 17, y, h, up: rand() > 0.42 }
+    const y = 214 - h * (0.35 + rand() * 0.5)
+    return { x: 408 + i * 17, y, h }
   })
 
   const gid = `g-${id.replace(/[^a-z0-9]/gi, '')}`
@@ -102,46 +111,33 @@ export function GeneratedThumbnail({ id, title, level, coach }: Props) {
     <svg viewBox="0 0 640 360" className="thumb-svg" role="img" aria-label={title}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#0d1117" />
-          <stop offset="55%" stopColor="#131a24" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.42" />
+          <stop offset="0%" stopColor={deep} />
+          <stop offset="100%" stopColor={light} />
         </linearGradient>
-        <linearGradient id={`${gid}-fade`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#0d1117" stopOpacity="0.96" />
-          <stop offset="70%" stopColor="#0d1117" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#0d1117" stopOpacity="0" />
+        {/* Keeps white text legible over the lighter end of the gradient. */}
+        <linearGradient id={`${gid}-scrim`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#04121e" stopOpacity="0.42" />
+          <stop offset="72%" stopColor="#04121e" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#04121e" stopOpacity="0" />
         </linearGradient>
       </defs>
 
       <rect width="640" height="360" fill={`url(#${gid})`} />
 
-      {/* chart motif */}
-      <g opacity="0.5">
+      <g opacity="0.32">
         {candles.map((c, i) => (
           <g key={i}>
-            <rect
-              x={c.x}
-              y={c.y}
-              width="9"
-              height={c.h}
-              rx="2"
-              fill={c.up ? color : '#ef4444'}
-              opacity={c.up ? 0.85 : 0.6}
-            />
-            <rect x={c.x + 3.5} y={c.y - 9} width="2" height={c.h + 18} rx="1" fill={c.up ? color : '#ef4444'} opacity="0.45" />
+            <rect x={c.x} y={c.y} width="9" height={c.h} rx="2" fill="#ffffff" />
+            <rect x={c.x + 3.5} y={c.y - 9} width="2" height={c.h + 18} rx="1" fill="#ffffff" opacity="0.7" />
           </g>
         ))}
       </g>
 
-      {/* keep text legible over the motif */}
-      <rect width="640" height="360" fill={`url(#${gid}-fade)`} />
-
-      {/* level accent bar */}
-      <rect x="0" y="0" width="7" height="360" fill={color} />
+      <rect width="640" height="360" fill={`url(#${gid}-scrim)`} />
 
       {/* level badge */}
-      <rect x="34" y="30" rx="11" width={LEVEL_LABEL[level].length * 8.6 + 26} height="26" fill={color} opacity="0.18" />
-      <text x={34 + 13} y="48" fill={color} fontSize="14" fontWeight="800" letterSpacing="1.4" fontFamily="system-ui, sans-serif">
+      <rect x="34" y="30" rx="12" width={LEVEL_LABEL[level].length * 8.6 + 26} height="27" fill="#ffffff" opacity="0.24" />
+      <text x={47} y="49" fill="#ffffff" fontSize="14" fontWeight="800" letterSpacing="1.4" fontFamily="system-ui, sans-serif">
         {LEVEL_LABEL[level]}
       </text>
 
@@ -160,12 +156,6 @@ export function GeneratedThumbnail({ id, title, level, coach }: Props) {
           </text>
         ))}
       </g>
-
-      {/* coach */}
-      <circle cx="41" cy="322" r="5" fill={color} />
-      <text x="56" y="327" fill="#cbd5e1" fontSize="19" fontWeight="600" fontFamily="system-ui, sans-serif">
-        {coach}
-      </text>
     </svg>
   )
 }

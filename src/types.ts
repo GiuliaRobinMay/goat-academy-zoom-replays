@@ -13,7 +13,8 @@ export interface Session {
   id: string
   title: string
   level: Level
-  coachId: string
+  /** Some sessions are co-hosted, so this is always a list. */
+  coachIds: string[]
   /** Roughly how often it runs — drives the generated replay history. */
   cadenceDays: number
 }
@@ -24,7 +25,7 @@ export interface Replay {
   sessionId: string
   title: string
   level: Level
-  coachId: string
+  coachIds: string[]
   /** ISO date (yyyy-mm-dd) the session was recorded. */
   date: string
   durationMin: number

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Replay } from '../types'
-import { coachName } from '../data/coaches'
+import { coachNames } from '../data/coaches'
 import { GeneratedThumbnail, LEVEL_LABEL } from '../lib/thumbnail'
 import { NotesEditor } from './NotesEditor'
 import { Check, External, Maximize, Minimize, Play } from './Icons'
@@ -18,7 +18,7 @@ interface Props {
 const WATCHED_AT = 0.9
 
 export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: Props) {
-  const coach = coachName(replay.coachId)
+  const coaches = coachNames(replay.coachIds)
   const [maximised, setMaximised] = useState(false)
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
           ) : (
             <>
               <div className="placeholder">
-                <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} coach={coach} />
+                <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
               </div>
               <div className="overlay">
                 <div>
@@ -83,7 +83,7 @@ export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: P
 
         <div className="card-meta" style={{ marginTop: 10, fontSize: 13 }}>
           <span className="tag" data-level={replay.level}>{LEVEL_LABEL[replay.level]}</span>
-          <span>{coach}</span>
+          <span>{coaches}</span>
           <span className="sep">·</span>
           <span>{formatDuration(replay.durationMin)}</span>
           {watched && <span className="watched-chip"><Check size={14} /> Watched</span>}

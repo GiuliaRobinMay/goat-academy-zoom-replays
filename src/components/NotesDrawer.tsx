@@ -1,6 +1,6 @@
 import type { Replay } from '../types'
 import type { NotesMap } from '../lib/storage'
-import { coachName } from '../data/coaches'
+import { coachNames } from '../data/coaches'
 import { formatDate } from './ReplayCard'
 import { X } from './Icons'
 
@@ -36,7 +36,7 @@ export function NotesDrawer({ notes, replays, onClose, onOpen }: Props) {
             withNotes.map((r) => (
               <button key={r.id} className="note-card" onClick={() => { onOpen(r); onClose() }}>
                 <div className="t">{r.title}</div>
-                <div className="m">{coachName(r.coachId)} · {formatDate(r.date)}</div>
+                <div className="m">{coachNames(r.coachIds)} · {formatDate(r.date)}</div>
                 <div className="x">{notes[r.id]}</div>
               </button>
             ))

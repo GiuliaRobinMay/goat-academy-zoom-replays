@@ -53,7 +53,7 @@ function buildReplays(): Replay[] {
           sessionId: session.id,
           title: session.title,
           level: session.level,
-          coachId: session.coachId,
+          coachIds: session.coachIds,
           date: isoDate(date),
           durationMin: 40 + Math.floor(rand() * 55),
         })
