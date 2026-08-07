@@ -60,6 +60,12 @@
   --intermediate-ink: #8a6600;
   --advanced-ink: #5b21b6;
   --all-ink: #0a56a3;
+  /* Bright versions used for the hover glow — these match the accent each
+     level's artwork already uses, so the card lights up in its own colour. */
+  --beginner-glow: #4fd39c;
+  --intermediate-glow: #f7c948;
+  --advanced-glow: #a98cf7;
+  --all-glow: #5cb0ee;
   --radius: 16px;
   --left-width: 420px;
 }
@@ -344,16 +350,46 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
 /* The level is coded by a hairline around the card, so the artwork itself can
    stay a soft tint. `--lvl` is set per card by the data-level rules below. */
 .card { border-color: var(--lvl, var(--border)); }
-.card[data-level='beginner'] { --lvl: var(--beginner); }
-.card[data-level='intermediate'] { --lvl: var(--intermediate); }
-.card[data-level='advanced'] { --lvl: var(--advanced); }
-.card[data-level='all'] { --lvl: var(--all); }
+[data-level='beginner'] { --lvl: var(--beginner); --glow: var(--beginner-glow); }
+[data-level='intermediate'] { --lvl: var(--intermediate); --glow: var(--intermediate-glow); }
+[data-level='advanced'] { --lvl: var(--advanced); --glow: var(--advanced-glow); }
+[data-level='all'] { --lvl: var(--all); --glow: var(--all-glow); }
 
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+/* Hover lights the card up in its own accent: a halo outside, and the artwork
+   itself brightening from the bottom up. */
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--glow);
+  box-shadow:
+    0 0 0 1px var(--glow),
+    0 0 22px -2px color-mix(in srgb, var(--glow) 55%, transparent),
+    0 14px 34px -10px color-mix(in srgb, var(--glow) 42%, transparent),
+    var(--shadow-lg);
+}
 .card[data-active='true'] { box-shadow: 0 0 0 2px var(--lvl), var(--shadow-lg); }
+.card[data-active='true']:hover {
+  box-shadow:
+    0 0 0 2px var(--glow),
+    0 0 24px -2px color-mix(in srgb, var(--glow) 60%, transparent),
+    var(--shadow-lg);
+}
 
 .thumb { position: relative; aspect-ratio: 16 / 9; background: var(--panel); overflow: hidden; }
 .thumb-svg, .thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* The lit wash inside the artwork. Sits above the art but below the date
+   chip, and never intercepts the pointer. */
+.thumb::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background:
+    radial-gradient(130% 96% at 18% 108%, color-mix(in srgb, var(--glow) 34%, transparent), transparent 68%),
+    radial-gradient(90% 80% at 96% -8%, color-mix(in srgb, var(--glow) 22%, transparent), transparent 70%);
+}
+.card:hover .thumb::after, .row:hover .row-thumb::after { opacity: 1; }
 
 /* Title and coach as fixed-size HTML, anchored to the bottom of the artwork.
    `max-height` reserves the top strip so text can never reach the date badge,
@@ -361,7 +397,7 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
 /* Everything reads from the top-left corner: date, then the title and coach
    together on one dark label so they stay legible over any of the fills. */
 .card-stack {
-  position: absolute; left: 10px; right: 10px; top: 10px;
+  position: absolute; left: 10px; right: 10px; top: 10px; z-index: 2;
   display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
 }
 
@@ -386,7 +422,6 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
   display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
 }
 
-.card:hover 
 /* Sits at the top of `.card-stack`, so it flows rather than being positioned. */
 .badge-date {
   align-self: flex-start;
@@ -436,9 +471,14 @@ body[data-resizing='true'] iframe, body[data-resizing='true'] video { pointer-ev
   background: transparent; text-align: left;
   transition: background 0.14s, border-color 0.14s;
 }
-.row:hover { background: var(--panel); border-color: var(--border); }
+.row:hover { background: var(--panel); border-color: var(--glow); }
 .row[data-active='true'] { background: var(--panel); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .row .row-thumb { position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; }
+.row .row-thumb::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s ease;
+  background: radial-gradient(130% 96% at 18% 108%, color-mix(in srgb, var(--glow) 34%, transparent), transparent 68%);
+}
 .row .t { font-size: 13px; font-weight: 700; line-height: 1.34; }
 .row .m { font-size: 11.5px; color: var(--muted); margin-top: 4px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 

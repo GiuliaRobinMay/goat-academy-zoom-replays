@@ -67,7 +67,7 @@ export function ReplayCard({ replay, watched, active, onOpen }: Props) {
 /** List view — the thumbnail is too small to read, so the row keeps the text. */
 export function ReplayRow({ replay, watched, active, onOpen }: Props) {
   return (
-    <button className="row" data-active={active} onClick={() => onOpen(replay)}>
+    <button className="row" data-level={replay.level} data-active={active} onClick={() => onOpen(replay)}>
       <div className="row-thumb">
         {replay.thumbnailUrl ? (
           <img src={replay.thumbnailUrl} alt={replay.title} loading="lazy" />
