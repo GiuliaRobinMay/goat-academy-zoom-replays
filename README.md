@@ -12,12 +12,14 @@ npm run build    # emits a single self-contained dist/index.html
 
 ## What's built
 
-- **Thumbnail grid**, grouped by month, with duration badges and a green tick on
-  anything already watched.
-- **Filters** — free-text search, coach, session type, level, and a calendar
-  where only days that actually have replays are selectable.
-- **Player page** with title, coach, level, date, "mark as watched", and a
-  "more like this" rail.
+- **Two panes** — the replay list on the left, player and notes on the right,
+  each scrolling independently, with a draggable splitter between them.
+- **Gallery and list views** for the left pane, toggled and remembered.
+- **Filters** — free-text search, coach, session (the Academy's 43 sessions,
+  grouped by level), level pills, and a calendar where only days that actually
+  have replays are selectable.
+- **Player** with a full-view control; a replay is marked watched automatically
+  once 90% of it has played, which puts a green tick on its card.
 - **Notes** — per-replay, autosaving, plus a drawer listing every note written.
 - **Dark / light mode**, remembered between visits.
 
@@ -57,8 +59,8 @@ The backend side, for reference:
 If a recording has no playable file, set `shareUrl` and `passcode` instead and
 the player falls back to an "Open in Zoom" button with the passcode shown.
 
-Level and session type don't exist in Zoom's API — they come from the mapping in
-`src/data/sessions.ts`, keyed off the meeting topic.
+Levels don't exist in Zoom's API — match the meeting `topic` against
+`src/data/sessions.ts` to resolve a recording to its session and level.
 
 ## Thumbnails
 

@@ -1,6 +1,6 @@
-import type { Level, SessionType } from '../types'
+import type { Level } from '../types'
 import { COACHES } from '../data/coaches'
-import { SESSION_TYPES } from '../data/sessions'
+import { SESSIONS_BY_LEVEL } from '../data/sessions'
 import { LEVEL_LABEL } from '../lib/thumbnail'
 import { CalendarPicker } from './CalendarPicker'
 import { Search } from './Icons'
@@ -8,7 +8,8 @@ import { Search } from './Icons'
 export interface FilterState {
   query: string
   coachId: string
-  type: string
+  /** A specific session from the Academy's session list, or '' for all. */
+  sessionId: string
   levels: Level[]
   date: string | null
   unwatchedOnly: boolean
@@ -17,7 +18,7 @@ export interface FilterState {
 export const EMPTY_FILTERS: FilterState = {
   query: '',
   coachId: '',
-  type: '',
+  sessionId: '',
   levels: [],
   date: null,
   unwatchedOnly: false,
@@ -29,21 +30,15 @@ interface Props {
   filters: FilterState
   onChange: (next: FilterState) => void
   availableDates: Set<string>
-  resultCount: number
-  totalCount: number
 }
 
-export function Filters({ filters, onChange, availableDates, resultCount, totalCount }: Props) {
+export function Filters({ filters, onChange, availableDates }: Props) {
   const set = <K extends keyof FilterState>(k: K, v: FilterState[K]) => onChange({ ...filters, [k]: v })
 
   const toggleLevel = (level: Level) =>
     set('levels', filters.levels.includes(level)
       ? filters.levels.filter((l) => l !== level)
       : [...filters.levels, level])
-
-  const dirty =
-    filters.query !== '' || filters.coachId !== '' || filters.type !== '' ||
-    filters.levels.length > 0 || filters.date !== null || filters.unwatchedOnly
 
   return (
     <div className="filters">
@@ -68,13 +63,17 @@ export function Filters({ filters, onChange, availableDates, resultCount, totalC
       </select>
 
       <select
-        className="control"
-        value={filters.type}
-        onChange={(e) => set('type', e.target.value)}
-        aria-label="Filter by session type"
+        className="control wide"
+        value={filters.sessionId}
+        onChange={(e) => set('sessionId', e.target.value)}
+        aria-label="Filter by session"
       >
-        <option value="">All session types</option>
-        {SESSION_TYPES.map((t: SessionType) => <option key={t} value={t}>{t}</option>)}
+        <option value="">All sessions</option>
+        {SESSIONS_BY_LEVEL.map((group) => (
+          <optgroup key={group.level} label={group.label}>
+            {group.sessions.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+          </optgroup>
+        ))}
       </select>
 
       <CalendarPicker value={filters.date} onChange={(d) => set('date', d)} available={availableDates} />
@@ -102,12 +101,6 @@ export function Filters({ filters, onChange, availableDates, resultCount, totalC
           Unwatched only
         </button>
       </div>
-
-      {dirty && (
-        <button className="link-btn" onClick={() => onChange(EMPTY_FILTERS)}>
-          Clear all ({resultCount}/{totalCount})
-        </button>
-      )}
     </div>
   )
 }

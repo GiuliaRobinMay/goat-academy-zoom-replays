@@ -10,11 +10,14 @@ interface Props {
   replay: Replay
   watched: boolean
   note: string
-  onToggleWatched: (id: string) => void
+  onWatched: (id: string) => void
   onNoteChange: (id: string, value: string) => void
 }
 
-export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChange }: Props) {
+/** Treat a replay as watched once most of it has played. */
+const WATCHED_AT = 0.9
+
+export function PlayerView({ replay, watched, note, onWatched, onNoteChange }: Props) {
   const coach = coachName(replay.coachId)
   const [maximised, setMaximised] = useState(false)
 
@@ -24,6 +27,12 @@ export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChang
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [maximised])
+
+  const trackProgress = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (watched) return
+    const el = e.currentTarget
+    if (el.duration && el.currentTime / el.duration >= WATCHED_AT) onWatched(replay.id)
+  }
 
   return (
     <div className="player-col">
@@ -40,7 +49,14 @@ export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChang
         <div className="stage">
           {replay.videoUrl ? (
             // Once the backend proxy is live this is the real MP4 stream.
-            <video src={replay.videoUrl} controls playsInline />
+            // Watching most of it is what marks the replay as watched.
+            <video
+              src={replay.videoUrl}
+              controls
+              playsInline
+              onTimeUpdate={trackProgress}
+              onEnded={() => onWatched(replay.id)}
+            />
           ) : (
             <>
               <div className="placeholder">
@@ -50,8 +66,8 @@ export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChang
                 <div>
                   <div className="big"><Play size={24} /></div>
                   <p>
-                    The recording streams here once the Zoom connection is live. The player,
-                    progress tracking and notes around it are already wired up.
+                    The recording streams here once the Zoom connection is live. The player
+                    and notes around it are already wired up.
                   </p>
                   <p className="note">Placeholder preview · no video attached yet</p>
                 </div>
@@ -62,9 +78,7 @@ export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChang
       </div>
 
       <div className="panel panel-pad">
-        <div className="player-eyebrow">
-          {replay.type} · {LEVEL_LABEL[replay.level]} · {formatDate(replay.date)}
-        </div>
+        <div className="player-eyebrow">{LEVEL_LABEL[replay.level]} · {formatDate(replay.date)}</div>
         <h2 className="player-title">{replay.title}</h2>
 
         <div className="card-meta" style={{ marginTop: 10, fontSize: 13 }}>
@@ -72,19 +86,7 @@ export function PlayerView({ replay, watched, note, onToggleWatched, onNoteChang
           <span>{coach}</span>
           <span className="sep">·</span>
           <span>{formatDuration(replay.durationMin)}</span>
-        </div>
-
-        <div className="player-actions">
-          {watched ? (
-            <>
-              <span className="watched-chip"><Check size={16} /> Watched</span>
-              <button className="btn ghost" onClick={() => onToggleWatched(replay.id)}>Mark as unwatched</button>
-            </>
-          ) : (
-            <button className="btn primary" onClick={() => onToggleWatched(replay.id)}>
-              <Check size={16} /> Mark as watched
-            </button>
-          )}
+          {watched && <span className="watched-chip"><Check size={14} /> Watched</span>}
         </div>
 
         {replay.shareUrl && (

@@ -18,6 +18,7 @@ const monthLabel = (iso: string) =>
 
 const MIN_LEFT = 300
 const MAX_LEFT = 720
+const DEFAULT_LEFT = 420
 
 export default function App() {
   const [replays, setReplays] = useState<Replay[]>([])
@@ -58,8 +59,7 @@ export default function App() {
 
     const move = (ev: PointerEvent) => {
       const left = splitRef.current?.getBoundingClientRect().left ?? 0
-      const next = Math.min(MAX_LEFT, Math.max(MIN_LEFT, ev.clientX - left))
-      setLeftWidth(next)
+      setLeftWidth(Math.min(MAX_LEFT, Math.max(MIN_LEFT, ev.clientX - left)))
     }
     const up = () => {
       setDragging(false)
@@ -73,8 +73,7 @@ export default function App() {
     window.addEventListener('pointerup', up)
   }, [])
 
-  // Double-click the handle to snap back to the default width.
-  const resetWidth = () => { setLeftWidth(420); saveLeftWidth(420) }
+  const resetWidth = () => { setLeftWidth(DEFAULT_LEFT); saveLeftWidth(DEFAULT_LEFT) }
 
   // ── Filtering ──────────────────────────────────────────────────────────
   const availableDates = useMemo(() => new Set(replays.map((r) => r.date)), [replays])
@@ -84,14 +83,11 @@ export default function App() {
 
     return replays.filter((r) => {
       if (filters.coachId && r.coachId !== filters.coachId) return false
-      if (filters.type && r.type !== filters.type) return false
+      if (filters.sessionId && r.sessionId !== filters.sessionId) return false
       if (filters.levels.length && !filters.levels.includes(r.level)) return false
       if (filters.date && r.date !== filters.date) return false
       if (filters.unwatchedOnly && watched.has(r.id)) return false
-      if (q) {
-        const haystack = `${r.title} ${coachName(r.coachId)} ${r.type} ${r.level}`.toLowerCase()
-        if (!haystack.includes(q)) return false
-      }
+      if (q && !`${r.title} ${coachName(r.coachId)} ${r.level}`.toLowerCase().includes(q)) return false
       return true
     })
   }, [replays, filters, watched])
@@ -108,13 +104,9 @@ export default function App() {
   }, [filtered])
 
   // ── State updates ──────────────────────────────────────────────────────
-  const toggleWatched = (id: string) =>
-    setWatched((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  const markWatched = useCallback((id: string) => {
+    setWatched((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+  }, [])
 
   const setNote = (id: string, value: string) =>
     setNotes((prev) => {
@@ -124,26 +116,20 @@ export default function App() {
       return next
     })
 
-  const watchedCount = useMemo(
-    () => replays.filter((r) => watched.has(r.id)).length,
-    [replays, watched],
-  )
-  const pct = replays.length ? Math.round((watchedCount / replays.length) * 100) : 0
-
   return (
     <div className="app">
-      <header className="header">
+      <header className="banner">
         <div className="logo">🐐</div>
-        <div>
+        <div className="banner-text">
           <h1>Replay Library</h1>
-          <div className="sub">GOAT Academy · live session recordings</div>
+          <p>GOAT Academy · every live session, on demand</p>
         </div>
         <div className="header-spacer" />
-        <button className="btn primary" onClick={() => setNotesOpen(true)}>
+        <button className="btn glass" onClick={() => setNotesOpen(true)}>
           <NotesIcon /> My notes
         </button>
         <button
-          className="btn icon"
+          className="btn glass icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -152,50 +138,20 @@ export default function App() {
         </button>
       </header>
 
-      <Filters
-        filters={filters}
-        onChange={setFilters}
-        availableDates={availableDates}
-        resultCount={filtered.length}
-        totalCount={replays.length}
-      />
+      <Filters filters={filters} onChange={setFilters} availableDates={availableDates} />
 
       <div className="split" ref={splitRef}>
         <div className="pane pane-left" style={{ width: leftWidth }}>
-          <div className="panel progress-card">
-            <div className="ring">
-              <svg width="52" height="52">
-                <circle cx="26" cy="26" r="21" fill="none" stroke="var(--panel-3)" strokeWidth="5" />
-                {/* A round cap on a zero-length arc renders as a stray dot. */}
-                {pct > 0 && (
-                  <circle
-                    cx="26" cy="26" r="21" fill="none"
-                    stroke="var(--accent)" strokeWidth="5" strokeLinecap="round"
-                    strokeDasharray={`${(pct / 100) * 2 * Math.PI * 21} ${2 * Math.PI * 21}`}
-                  />
-                )}
-              </svg>
-              <span className="val">{pct}%</span>
-            </div>
-            <div className="progress-text">
-              <div className="n">{watchedCount} of {replays.length} replays</div>
-              <div className="l">watched</div>
-            </div>
+          <div className="list-bar">
+            <span><strong>{filtered.length}</strong> {filtered.length === 1 ? 'replay' : 'replays'}</span>
             <div className="seg">
+              <button data-on={view === 'grid'} onClick={() => setView('grid')} aria-label="Gallery view" title="Gallery view">
+                <GridIcon size={17} />
+              </button>
               <button data-on={view === 'list'} onClick={() => setView('list')} aria-label="List view" title="List view">
                 <ListIcon size={17} />
               </button>
-              <button data-on={view === 'grid'} onClick={() => setView('grid')} aria-label="Thumbnail view" title="Thumbnail view">
-                <GridIcon size={17} />
-              </button>
             </div>
-          </div>
-
-          <div className="list-count">
-            <span><strong>{filtered.length}</strong> shown</span>
-            {filtered.length !== replays.length && (
-              <button className="link-btn" onClick={() => setFilters(EMPTY_FILTERS)}>Clear filters</button>
-            )}
           </div>
 
           {filtered.length === 0 ? (
@@ -258,7 +214,7 @@ export default function App() {
               replay={selected}
               watched={watched.has(selected.id)}
               note={notes[selected.id] ?? ''}
-              onToggleWatched={toggleWatched}
+              onWatched={markWatched}
               onNoteChange={setNote}
             />
           ) : (

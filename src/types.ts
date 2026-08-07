@@ -1,16 +1,5 @@
 export type Level = 'beginner' | 'intermediate' | 'advanced' | 'all'
 
-export type SessionType =
-  | 'Market Update'
-  | 'Q&A'
-  | 'Workshop'
-  | 'Broker Setup'
-  | 'Fundamentals'
-  | 'Strategy & Charting'
-  | 'Risk & Planning'
-  | 'Success Path'
-  | 'Macro & Psychology'
-
 export interface Coach {
   id: string
   name: string
@@ -18,12 +7,12 @@ export interface Coach {
   levels: Level[]
 }
 
-/** A recurring session format, e.g. "The Weekly Round-Up". */
+/** A recurring session, e.g. "The Weekly Round-Up". These are the Academy's
+ *  actual session list — the filter dropdown is built straight from them. */
 export interface Session {
   id: string
   title: string
   level: Level
-  type: SessionType
   coachId: string
   /** Roughly how often it runs — drives the generated replay history. */
   cadenceDays: number
@@ -35,7 +24,6 @@ export interface Replay {
   sessionId: string
   title: string
   level: Level
-  type: SessionType
   coachId: string
   /** ISO date (yyyy-mm-dd) the session was recorded. */
   date: string
