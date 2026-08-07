@@ -82,6 +82,11 @@ interface Props {
   level: Level
 }
 
+/**
+ * Only the title lives inside the SVG. Date, duration and the watched tick are
+ * HTML overlays on top, so they stay a fixed size whether the artwork is a
+ * 160px card or a full-width player.
+ */
 export function GeneratedThumbnail({ id, title, level }: Props) {
   const [deep, light] = GRADIENT[level]
   const rand = seeded(id)
@@ -96,7 +101,7 @@ export function GeneratedThumbnail({ id, title, level }: Props) {
   const fontSize = Math.max(22, Math.min(byCount, byWidth))
 
   const blockHeight = lines.length * fontSize * 1.06
-  const startY = 196 - blockHeight / 2 + fontSize * 0.8
+  const startY = 186 - blockHeight / 2 + fontSize * 0.8
 
   // Candlestick motif — seeded so each card is distinct but never changes.
   const candles = Array.from({ length: 14 }, (_, i) => {
@@ -135,13 +140,7 @@ export function GeneratedThumbnail({ id, title, level }: Props) {
 
       <rect width="640" height="360" fill={`url(#${gid}-scrim)`} />
 
-      {/* level badge */}
-      <rect x="34" y="30" rx="12" width={LEVEL_LABEL[level].length * 8.6 + 26} height="27" fill="#ffffff" opacity="0.24" />
-      <text x={47} y="49" fill="#ffffff" fontSize="14" fontWeight="800" letterSpacing="1.4" fontFamily="system-ui, sans-serif">
-        {LEVEL_LABEL[level]}
-      </text>
-
-      {/* title */}
+      {/* title — the level is carried by the gradient colour */}
       <g fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontWeight="800">
         {lines.map((line, i) => (
           <text
