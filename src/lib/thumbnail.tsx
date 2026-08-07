@@ -14,22 +14,24 @@ import type { Level } from '../types'
  */
 
 export const LEVEL_COLOR: Record<Level, string> = {
-  beginner: '#22c55e',
-  intermediate: '#f59e0b',
-  advanced: '#a855f7',
-  all: '#3b82f6',
+  beginner: '#22a559',
+  intermediate: '#f4b400',
+  advanced: '#7c3aed',
+  all: '#0d6fd0',
 }
 
 /**
- * Deep-to-light pair per level, softened so the card reads as a tint rather
- * than a solid block. The deep end is painted at the bottom left, under the
- * title, and the pale end at the top right.
+ * The brand colour at full strength, shading to a deeper tone of the same hue
+ * at the bottom left where the text sits. No overlay or scrim — the card is
+ * saturated enough for its ink colour to read directly on it.
+ *
+ * `motif` is the chart pattern: white on the dark cards, near-black on yellow.
  */
-const GRADIENT: Record<Level, [string, string]> = {
-  beginner: ['#0d9488', '#a7f3d0'],
-  intermediate: ['#ca8a04', '#fef08a'],
-  advanced: ['#7c3aed', '#e2d5fb'],
-  all: ['#2563eb', '#c3dafe'],
+const ART: Record<Level, { from: string; to: string; motif: string; motifOpacity: number }> = {
+  beginner: { from: '#22a559', to: '#177c41', motif: '#ffffff', motifOpacity: 0.18 },
+  intermediate: { from: '#f4b400', to: '#c98f00', motif: '#3d2c00', motifOpacity: 0.16 },
+  advanced: { from: '#7c3aed', to: '#5a24bd', motif: '#ffffff', motifOpacity: 0.18 },
+  all: { from: '#0d6fd0', to: '#08549f', motif: '#ffffff', motifOpacity: 0.18 },
 }
 
 export const LEVEL_LABEL: Record<Level, string> = {
@@ -62,7 +64,7 @@ interface Props {
 }
 
 export function GeneratedThumbnail({ id, level, title }: Props) {
-  const [deep, light] = GRADIENT[level]
+  const { from, to, motif, motifOpacity } = ART[level]
   const rand = seeded(id)
 
   const candles = Array.from({ length: 16 }, (_, i) => {
@@ -76,23 +78,21 @@ export function GeneratedThumbnail({ id, level, title }: Props) {
   return (
     <svg viewBox="0 0 640 360" className="thumb-svg" role="img" aria-label={title}>
       <defs>
-        {/* Pale at the top right, deep at the bottom left — so the corner the
-            title sits in is the darkest part of the artwork. */}
+        {/* Brand colour at the top right, deepening toward the bottom left
+            where the title sits. */}
         <linearGradient id={gid} x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={light} />
-          <stop offset="100%" stopColor={deep} />
+          <stop offset="0%" stopColor={from} />
+          <stop offset="100%" stopColor={to} />
         </linearGradient>
       </defs>
 
-      {/* Slightly translucent so the card reads as a tint over the surface
-          beneath it, leaving the level hairline to do the colour-coding. */}
-      <rect width="640" height="360" fill={`url(#${gid})`} opacity="0.82" />
+      <rect width="640" height="360" fill={`url(#${gid})`} />
 
-      <g opacity="0.26">
+      <g opacity={motifOpacity}>
         {candles.map((c, i) => (
           <g key={i}>
-            <rect x={c.x} y={c.y} width="15" height={c.h} rx="3" fill="#ffffff" />
-            <rect x={c.x + 6} y={c.y - 14} width="3" height={c.h + 28} rx="1.5" fill="#ffffff" opacity="0.7" />
+            <rect x={c.x} y={c.y} width="15" height={c.h} rx="3" fill={motif} />
+            <rect x={c.x + 6} y={c.y - 14} width="3" height={c.h + 28} rx="1.5" fill={motif} opacity="0.7" />
           </g>
         ))}
       </g>
