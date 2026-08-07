@@ -1,4 +1,4 @@
-import type { Level, Session } from '../types'
+import type { Session } from '../types'
 
 /**
  * The Academy's full session list, transcribed from the session overview and
@@ -8,7 +8,7 @@ import type { Level, Session } from '../types'
  * Coach and cadence are the only invented fields — Zoom supplies the real host
  * and dates once connected. Titles and levels are exactly as given.
  */
-export const SESSIONS: Session[] = [
+export const DEFAULT_SESSIONS: Session[] = [
   // ── ALL LEVELS · 10 sessions ────────────────────────────────────────────
   { id: 'market-review', title: 'Market Review · BK / Brett / Patrick', level: 'all', coachIds: ['byung-kim', 'brett', 'patrick'], cadenceDays: 7 },
   { id: 'midweek-markets', title: 'Mid-week Markets Update and Q&A', level: 'all', coachIds: ['patrick'], cadenceDays: 7 },
@@ -59,12 +59,3 @@ export const SESSIONS: Session[] = [
   { id: 'macro-data-analysis', title: 'Macro Data Analysis for Investors', level: 'advanced', coachIds: ['brendan'], cadenceDays: 21 },
 ]
 
-export const sessionById = (id: string) => SESSIONS.find((s) => s.id === id)
-
-/** Sessions grouped by level, in the order the filter dropdown lists them. */
-export const SESSIONS_BY_LEVEL: { level: Level; label: string; sessions: Session[] }[] = [
-  { level: 'all', label: 'All levels', sessions: SESSIONS.filter((s) => s.level === 'all') },
-  { level: 'beginner', label: 'Beginner', sessions: SESSIONS.filter((s) => s.level === 'beginner') },
-  { level: 'intermediate', label: 'Intermediate', sessions: SESSIONS.filter((s) => s.level === 'intermediate') },
-  { level: 'advanced', label: 'Advanced', sessions: SESSIONS.filter((s) => s.level === 'advanced') },
-]

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Replay } from './types'
 import { fetchReplays } from './lib/api'
-import { coachNames } from './data/coaches'
+import { coachNames } from './lib/catalogue'
 import {
   loadLeftWidth, loadNotes, loadTheme, loadView, loadWatched,
   saveLeftWidth, saveNotes, saveTheme, saveView, saveWatched,
@@ -11,7 +11,9 @@ import { EMPTY_FILTERS, Filters, type FilterState } from './components/Filters'
 import { ReplayCard, ReplayRow } from './components/ReplayCard'
 import { PlayerView } from './components/PlayerView'
 import { NotesDrawer } from './components/NotesDrawer'
-import { GridIcon, ListIcon, Moon, NotesIcon, Sun } from './components/Icons'
+import { AdminPanel } from './components/AdminPanel'
+import { isAdmin, syncAdminFromUrl } from './lib/admin'
+import { GridIcon, ListIcon, Moon, NotesIcon, Settings, Sun } from './components/Icons'
 
 const monthLabel = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
@@ -31,16 +33,26 @@ export default function App() {
   const [leftWidth, setLeftWidth] = useState<number>(() => loadLeftWidth())
   const [dragging, setDragging] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
+  const [adminOpen, setAdminOpen] = useState(false)
+  // Resolved once on mount; see lib/admin.ts for how this becomes a real check.
+  const [admin] = useState(() => { syncAdminFromUrl(); return isAdmin() })
 
   const splitRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    // Open on the newest replay so the player is never empty on arrival.
+  const loadReplays = useCallback(() => {
     fetchReplays().then((all) => {
       setReplays(all)
-      setSelected((current) => current ?? all[0] ?? null)
+      // Keep the open replay if it survived the change, else fall back to the
+      // newest one so the player is never left empty.
+      setSelected((current) => {
+        if (current && all.some((r) => r.id === current.id)) return current
+        return all[0] ?? null
+      })
     })
   }, [])
+
+  // Open on the newest replay so the player is never empty on arrival.
+  useEffect(() => { loadReplays() }, [loadReplays])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -128,6 +140,11 @@ export default function App() {
         <button className="btn glass" onClick={() => setNotesOpen(true)}>
           <NotesIcon /> My notes
         </button>
+        {admin && (
+          <button className="btn glass" onClick={() => setAdminOpen(true)} title="Coaches and lessons">
+            <Settings /> Admin
+          </button>
+        )}
         <button
           className="btn glass icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -225,6 +242,10 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {adminOpen && (
+        <AdminPanel onClose={() => setAdminOpen(false)} onSaved={loadReplays} />
+      )}
 
       {notesOpen && (
         <NotesDrawer

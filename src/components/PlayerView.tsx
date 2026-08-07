@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Replay } from '../types'
-import { coachNames } from '../data/coaches'
+import { coachNames } from '../lib/catalogue'
 import { GeneratedThumbnail, LEVEL_LABEL } from '../lib/thumbnail'
 import { NotesEditor } from './NotesEditor'
 import { Check, External, Maximize, Minimize } from './Icons'

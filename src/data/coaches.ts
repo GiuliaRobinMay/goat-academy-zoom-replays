@@ -1,7 +1,10 @@
 import type { Coach } from '../types'
 
-/** Coach roster and the levels each one teaches. */
-export const COACHES: Coach[] = [
+/**
+ * Bundled default roster. The live list comes from `lib/catalogue`, which
+ * layers any admin edits on top of this.
+ */
+export const DEFAULT_COACHES: Coach[] = [
   // Beginner only
   { id: 'matt-williamson', name: 'Matt Williamson', levels: ['beginner'] },
   { id: 'guillermo', name: 'Guillermo', levels: ['beginner'] },
@@ -35,12 +38,3 @@ export const COACHES: Coach[] = [
   { id: 'juri', name: 'Juri', levels: ['all'] },
 ]
 
-export const coachById = (id: string) => COACHES.find((c) => c.id === id)
-export const coachName = (id: string) => coachById(id)?.name ?? 'GOAT Academy'
-
-/** "Byung Kim, Brett & Patrick" — for co-hosted sessions. */
-export const coachNames = (ids: string[]) => {
-  const names = ids.map(coachName)
-  if (names.length <= 1) return names[0] ?? 'GOAT Academy'
-  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
-}

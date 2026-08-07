@@ -1,4 +1,4 @@
-import { SESSIONS } from '../data/sessions'
+import { getSessions } from './catalogue'
 
 /**
  * Real cover art, loaded from `src/assets/thumbs/`.
@@ -24,14 +24,12 @@ const IMAGES: string[] = Object.keys(modules)
   .sort()
   .map((path) => modules[path])
 
-/** Stable session -> image assignment, cycling if there are fewer images. */
-const BY_SESSION: Record<string, string> = {}
-if (IMAGES.length > 0) {
-  SESSIONS.forEach((session, i) => {
-    BY_SESSION[session.id] = IMAGES[i % IMAGES.length]
-  })
+/** Stable session -> image assignment, cycling if there are fewer images.
+ *  Resolved per call so sessions added in the admin zone get art too. */
+export function thumbnailFor(sessionId: string): string | undefined {
+  if (IMAGES.length === 0) return undefined
+  const i = getSessions().findIndex((s) => s.id === sessionId)
+  return i < 0 ? undefined : IMAGES[i % IMAGES.length]
 }
-
-export const thumbnailFor = (sessionId: string): string | undefined => BY_SESSION[sessionId]
 
 export const hasRealThumbnails = IMAGES.length > 0

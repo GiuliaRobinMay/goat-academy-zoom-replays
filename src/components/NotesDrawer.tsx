@@ -1,6 +1,6 @@
 import type { Replay } from '../types'
 import type { NotesMap } from '../lib/storage'
-import { coachNames } from '../data/coaches'
+import { coachNames } from '../lib/catalogue'
 import { formatDate } from './ReplayCard'
 import { X } from './Icons'
 

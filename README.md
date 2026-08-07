@@ -26,17 +26,47 @@ npm run build    # emits a single self-contained dist/index.html
 Levels are colour-coded throughout: beginner green, intermediate amber,
 advanced purple, all-levels blue.
 
+## Admin zone
+
+Coaches and lessons are editable in the app, so adding a coach or a new session
+never needs a code change.
+
+- **Getting in:** visit the app once with `?admin=1`. That sets a local flag and
+  strips the parameter from the URL; `?admin=0` revokes it. Members see no trace
+  of it — the button is not rendered at all.
+- **What it edits:** the coach roster (name, levels) and the lesson list (title,
+  level, coaches, cadence, cover headline, cover tagline, recap). Chapter
+  timestamps are deliberately not editable — those should come from the Zoom
+  transcript.
+- **Export / Import** round-trips the whole catalogue as JSON, so a set of edits
+  can be reviewed, version-controlled, or moved between environments.
+- **Restore defaults** drops back to the bundled `src/data/*` files.
+
+> ⚠️ **`?admin=1` is a placeholder, not security.** Anyone who knows the
+> parameter can grant it to themselves, and edits currently live in that
+> browser's localStorage rather than on a server.
+>
+> Two things to replace before this is real:
+> 1. `isAdmin()` in `src/lib/admin.ts` — swap for the host's member role, a
+>    claim on the session token, or an endpoint on our backend. Every admin
+>    control is already behind that single function.
+> 2. `read()` / `persist()` in `src/lib/catalogue.ts` — swap localStorage for
+>    API calls so the catalogue is shared rather than per-browser.
+
 ## Where the data comes from
 
 Everything currently renders from a generated placeholder archive so the UI can
-be reviewed before any integration exists. Two files define it:
+be reviewed before any integration exists.
 
-- `src/data/coaches.ts` — the coach roster and which levels each one teaches.
-- `src/data/sessions.ts` — the recurring session formats, each tagged with its
-  level, type and coach.
+- `src/lib/catalogue.ts` — **the live catalogue.** Everything reads coaches and
+  sessions from here, which layers admin edits over the bundled defaults.
+- `src/data/coaches.ts` / `src/data/sessions.ts` — the bundled defaults.
+- `src/data/artwork.ts` / `src/data/recaps.ts` — default cover copy and recaps,
+  folded onto each session by the catalogue.
 
-`src/data/replays.ts` expands those into dated occurrences. Nothing in the UI
-imports it directly — the app only ever calls `fetchReplays()`.
+`src/data/replays.ts` expands the catalogue into dated occurrences, rebuilt on
+every fetch so admin edits appear immediately. Nothing in the UI imports it
+directly — the app only ever calls `fetchReplays()`.
 
 ## Wiring up the real data
 

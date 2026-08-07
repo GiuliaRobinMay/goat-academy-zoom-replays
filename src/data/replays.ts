@@ -1,16 +1,17 @@
 import type { Replay } from '../types'
-import { SESSIONS } from './sessions'
 import { RECAPS } from './recaps'
-import { ARTWORK } from './artwork'
+import { getSessions } from '../lib/catalogue'
 import { thumbnailFor } from '../lib/thumbnails'
 
 /**
  * Placeholder replay history.
  *
  * Every occurrence here is generated from the recurring session definitions so
- * the UI has a realistic archive to filter and page through. When Vlad wires up
- * the Zoom Cloud Recording API this module is replaced wholesale — nothing else
- * in the app reads from it directly (see `lib/api.ts`).
+ * the UI has a realistic archive to filter and page through. It is rebuilt on
+ * every fetch, so edits made in the admin zone show up immediately.
+ *
+ * When Vlad wires up the Zoom Cloud Recording API this module is replaced
+ * wholesale — nothing else in the app reads from it directly (see `lib/api.ts`).
  */
 
 /** Newest recording in the generated archive. */
@@ -36,10 +37,10 @@ function seeded(seed: string) {
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10)
 
-function buildReplays(): Replay[] {
+export function buildReplays(): Replay[] {
   const out: Replay[] = []
 
-  for (const session of SESSIONS) {
+  for (const session of getSessions()) {
     const rand = seeded(session.id)
     // Stagger each session's start so they don't all land on the same day.
     let offset = Math.floor(rand() * session.cadenceDays)
@@ -53,7 +54,6 @@ function buildReplays(): Replay[] {
       if (day !== 0 && day !== 6) {
         const durationMin = 40 + Math.floor(rand() * 55)
         const entry = RECAPS[session.id]
-        const art = ARTWORK[session.id]
 
         out.push({
           id: `${session.id}-${isoDate(date)}`,
@@ -64,9 +64,9 @@ function buildReplays(): Replay[] {
           date: isoDate(date),
           durationMin,
           thumbnailUrl: thumbnailFor(session.id),
-          display: art?.display ?? session.title,
-          tagline: art?.tagline,
-          recap: entry?.recap,
+          display: session.display ?? session.title,
+          tagline: session.tagline,
+          recap: session.recap,
           // Chapter positions are stored as fractions, so they land inside
           // whatever length this particular recording turned out to be.
           chapters: entry?.chapters.map((c) => ({
@@ -82,4 +82,3 @@ function buildReplays(): Replay[] {
   return out.sort((a, b) => b.date.localeCompare(a.date))
 }
 
-export const REPLAYS: Replay[] = buildReplays()

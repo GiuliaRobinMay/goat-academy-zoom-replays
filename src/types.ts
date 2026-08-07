@@ -17,6 +17,12 @@ export interface Session {
   coachIds: string[]
   /** Roughly how often it runs — drives the generated replay history. */
   cadenceDays: number
+  /** Short headline for the cover art, e.g. "Broker TOS". */
+  display?: string
+  /** One-line description under the headline. */
+  tagline?: string
+  /** Short summary of what the session covers. */
+  recap?: string
 }
 
 /** A jump point inside a recording. */

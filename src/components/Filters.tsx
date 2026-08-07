@@ -1,6 +1,5 @@
 import type { Level } from '../types'
-import { COACHES } from '../data/coaches'
-import { SESSIONS_BY_LEVEL } from '../data/sessions'
+import { getCoaches, sessionsByLevel } from '../lib/catalogue'
 import { LEVEL_LABEL } from '../lib/thumbnail'
 import { CalendarPicker } from './CalendarPicker'
 import { Search } from './Icons'
@@ -59,7 +58,7 @@ export function Filters({ filters, onChange, availableDates }: Props) {
         aria-label="Filter by coach"
       >
         <option value="">All coaches</option>
-        {COACHES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        {getCoaches().map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select>
 
       <select
@@ -69,7 +68,7 @@ export function Filters({ filters, onChange, availableDates }: Props) {
         aria-label="Filter by session"
       >
         <option value="">All sessions</option>
-        {SESSIONS_BY_LEVEL.map((group) => (
+        {sessionsByLevel().map((group) => (
           <optgroup key={group.level} label={group.label}>
             {group.sessions.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
           </optgroup>

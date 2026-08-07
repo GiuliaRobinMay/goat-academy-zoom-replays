@@ -1,5 +1,5 @@
 import type { Replay } from '../types'
-import { REPLAYS } from '../data/replays'
+import { buildReplays } from '../data/replays'
 
 /**
  * The single seam between the UI and where replays actually come from.
@@ -21,7 +21,7 @@ export interface ReplaySource {
 
 export const mockSource: ReplaySource = {
   async fetchReplays() {
-    return REPLAYS
+    return buildReplays()
   },
 }
 
