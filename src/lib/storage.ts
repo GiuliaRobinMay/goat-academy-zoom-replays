@@ -10,6 +10,8 @@ const KEY = {
   watched: 'goat.replays.watched',
   notes: 'goat.replays.notes',
   theme: 'goat.replays.theme',
+  view: 'goat.replays.view',
+  leftWidth: 'goat.replays.leftWidth',
 } as const
 
 function read<T>(key: string, fallback: T): T {
@@ -37,5 +39,13 @@ export const loadNotes = () => read<NotesMap>(KEY.notes, {})
 export const saveNotes = (notes: NotesMap) => write(KEY.notes, notes)
 
 export type Theme = 'dark' | 'light'
-export const loadTheme = (): Theme => read<Theme>(KEY.theme, 'dark')
+export const loadTheme = (): Theme => read<Theme>(KEY.theme, 'light')
 export const saveTheme = (theme: Theme) => write(KEY.theme, theme)
+
+export type ViewMode = 'grid' | 'list'
+export const loadView = () => read<ViewMode>(KEY.view, 'grid')
+export const saveView = (view: ViewMode) => write(KEY.view, view)
+
+/** Width of the replay list column, in px. */
+export const loadLeftWidth = () => read<number>(KEY.leftWidth, 420)
+export const saveLeftWidth = (px: number) => write(KEY.leftWidth, px)

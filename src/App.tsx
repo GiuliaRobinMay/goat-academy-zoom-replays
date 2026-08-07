@@ -1,19 +1,23 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Replay } from './types'
 import { fetchReplays } from './lib/api'
-import { COACHES, coachName } from './data/coaches'
+import { coachName } from './data/coaches'
 import {
-  loadNotes, loadTheme, loadWatched, saveNotes, saveTheme, saveWatched,
-  type NotesMap, type Theme,
+  loadLeftWidth, loadNotes, loadTheme, loadView, loadWatched,
+  saveLeftWidth, saveNotes, saveTheme, saveView, saveWatched,
+  type NotesMap, type Theme, type ViewMode,
 } from './lib/storage'
 import { EMPTY_FILTERS, Filters, type FilterState } from './components/Filters'
-import { ReplayCard } from './components/ReplayCard'
+import { ReplayCard, ReplayRow } from './components/ReplayCard'
 import { PlayerView } from './components/PlayerView'
 import { NotesDrawer } from './components/NotesDrawer'
-import { Moon, NotesIcon, Sun } from './components/Icons'
+import { GridIcon, ListIcon, Moon, NotesIcon, Sun } from './components/Icons'
 
 const monthLabel = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+
+const MIN_LEFT = 300
+const MAX_LEFT = 720
 
 export default function App() {
   const [replays, setReplays] = useState<Replay[]>([])
@@ -22,9 +26,20 @@ export default function App() {
   const [watched, setWatched] = useState<Set<string>>(() => loadWatched())
   const [notes, setNotes] = useState<NotesMap>(() => loadNotes())
   const [theme, setTheme] = useState<Theme>(() => loadTheme())
+  const [view, setView] = useState<ViewMode>(() => loadView())
+  const [leftWidth, setLeftWidth] = useState<number>(() => loadLeftWidth())
+  const [dragging, setDragging] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
 
-  useEffect(() => { fetchReplays().then(setReplays) }, [])
+  const splitRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Open on the newest replay so the player is never empty on arrival.
+    fetchReplays().then((all) => {
+      setReplays(all)
+      setSelected((current) => current ?? all[0] ?? null)
+    })
+  }, [])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -33,7 +48,35 @@ export default function App() {
 
   useEffect(() => { saveWatched(watched) }, [watched])
   useEffect(() => { saveNotes(notes) }, [notes])
+  useEffect(() => { saveView(view) }, [view])
 
+  // ── Splitter ───────────────────────────────────────────────────────────
+  const startDrag = useCallback((e: React.PointerEvent) => {
+    e.preventDefault()
+    setDragging(true)
+    document.body.dataset.resizing = 'true'
+
+    const move = (ev: PointerEvent) => {
+      const left = splitRef.current?.getBoundingClientRect().left ?? 0
+      const next = Math.min(MAX_LEFT, Math.max(MIN_LEFT, ev.clientX - left))
+      setLeftWidth(next)
+    }
+    const up = () => {
+      setDragging(false)
+      delete document.body.dataset.resizing
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setLeftWidth((w) => { saveLeftWidth(w); return w })
+    }
+
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }, [])
+
+  // Double-click the handle to snap back to the default width.
+  const resetWidth = () => { setLeftWidth(420); saveLeftWidth(420) }
+
+  // ── Filtering ──────────────────────────────────────────────────────────
   const availableDates = useMemo(() => new Set(replays.map((r) => r.date)), [replays])
 
   const filtered = useMemo(() => {
@@ -53,7 +96,6 @@ export default function App() {
     })
   }, [replays, filters, watched])
 
-  // Library is grouped by month so a long archive still reads as a timeline.
   const groups = useMemo(() => {
     const map = new Map<string, Replay[]>()
     for (const r of filtered) {
@@ -65,23 +107,7 @@ export default function App() {
     return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0]))
   }, [filtered])
 
-  const related = useMemo(() => {
-    if (!selected) return []
-    // A couple of earlier runs of the same session, then other work from the
-    // same coach — otherwise the list is five copies of one recurring session.
-    const earlier = replays
-      .filter((r) => r.sessionId === selected.sessionId && r.id !== selected.id)
-      .slice(0, 2)
-    const sameCoach = replays.filter(
-      (r) => r.coachId === selected.coachId && r.sessionId !== selected.sessionId,
-    )
-    const seen = new Set<string>()
-    const bySession = sameCoach.filter((r) =>
-      seen.has(r.sessionId) ? false : (seen.add(r.sessionId), true),
-    )
-    return [...earlier, ...bySession].slice(0, 5)
-  }, [selected, replays])
-
+  // ── State updates ──────────────────────────────────────────────────────
   const toggleWatched = (id: string) =>
     setWatched((prev) => {
       const next = new Set(prev)
@@ -98,15 +124,11 @@ export default function App() {
       return next
     })
 
-  const open = (replay: Replay) => {
-    setSelected(replay)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   const watchedCount = useMemo(
     () => replays.filter((r) => watched.has(r.id)).length,
     [replays, watched],
   )
+  const pct = replays.length ? Math.round((watchedCount / replays.length) * 100) : 0
 
   return (
     <div className="app">
@@ -114,12 +136,10 @@ export default function App() {
         <div className="logo">🐐</div>
         <div>
           <h1>Replay Library</h1>
-          <div className="sub">
-            {replays.length} replays · {COACHES.length} coaches · {watchedCount} watched
-          </div>
+          <div className="sub">GOAT Academy · live session recordings</div>
         </div>
         <div className="header-spacer" />
-        <button className="btn" onClick={() => setNotesOpen(true)}>
+        <button className="btn primary" onClick={() => setNotesOpen(true)}>
           <NotesIcon /> My notes
         </button>
         <button
@@ -132,60 +152,130 @@ export default function App() {
         </button>
       </header>
 
-      {selected ? (
-        <PlayerView
-          replay={selected}
-          related={related}
-          watched={watched.has(selected.id)}
-          watchedIds={watched}
-          note={notes[selected.id] ?? ''}
-          onBack={() => setSelected(null)}
-          onToggleWatched={toggleWatched}
-          onNoteChange={setNote}
-          onOpen={open}
-        />
-      ) : (
-        <>
-          <Filters
-            filters={filters}
-            onChange={setFilters}
-            availableDates={availableDates}
-            resultCount={filtered.length}
-            totalCount={replays.length}
-          />
+      <Filters
+        filters={filters}
+        onChange={setFilters}
+        availableDates={availableDates}
+        resultCount={filtered.length}
+        totalCount={replays.length}
+      />
 
-          <main className="main">
-            {filtered.length === 0 ? (
-              <div className="empty">
-                <h3>No replays match those filters</h3>
-                <p style={{ margin: 0 }}>Try clearing the date or widening the level selection.</p>
-              </div>
-            ) : (
-              groups.map(([month, items]) => (
-                <section key={month}>
-                  <div className="group-head">
-                    <span>{monthLabel(`${month}-01`)}</span>
-                    <span className="rule" />
-                    <span>{items.length}</span>
-                  </div>
+      <div className="split" ref={splitRef}>
+        <div className="pane pane-left" style={{ width: leftWidth }}>
+          <div className="panel progress-card">
+            <div className="ring">
+              <svg width="52" height="52">
+                <circle cx="26" cy="26" r="21" fill="none" stroke="var(--panel-3)" strokeWidth="5" />
+                {/* A round cap on a zero-length arc renders as a stray dot. */}
+                {pct > 0 && (
+                  <circle
+                    cx="26" cy="26" r="21" fill="none"
+                    stroke="var(--accent)" strokeWidth="5" strokeLinecap="round"
+                    strokeDasharray={`${(pct / 100) * 2 * Math.PI * 21} ${2 * Math.PI * 21}`}
+                  />
+                )}
+              </svg>
+              <span className="val">{pct}%</span>
+            </div>
+            <div className="progress-text">
+              <div className="n">{watchedCount} of {replays.length} replays</div>
+              <div className="l">watched</div>
+            </div>
+            <div className="seg">
+              <button data-on={view === 'list'} onClick={() => setView('list')} aria-label="List view" title="List view">
+                <ListIcon size={17} />
+              </button>
+              <button data-on={view === 'grid'} onClick={() => setView('grid')} aria-label="Thumbnail view" title="Thumbnail view">
+                <GridIcon size={17} />
+              </button>
+            </div>
+          </div>
+
+          <div className="list-count">
+            <span><strong>{filtered.length}</strong> shown</span>
+            {filtered.length !== replays.length && (
+              <button className="link-btn" onClick={() => setFilters(EMPTY_FILTERS)}>Clear filters</button>
+            )}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="empty">
+              <h3>No replays match</h3>
+              <p>Try clearing the date or widening the level selection.</p>
+            </div>
+          ) : (
+            groups.map(([month, items]) => (
+              <section key={month}>
+                <div className="group-head">
+                  <span>{monthLabel(`${month}-01`)}</span>
+                  <span className="rule" />
+                  <span>{items.length}</span>
+                </div>
+                {view === 'grid' ? (
                   <div className="grid">
                     {items.map((r) => (
-                      <ReplayCard key={r.id} replay={r} watched={watched.has(r.id)} onOpen={open} />
+                      <ReplayCard
+                        key={r.id}
+                        replay={r}
+                        watched={watched.has(r.id)}
+                        active={selected?.id === r.id}
+                        onOpen={setSelected}
+                      />
                     ))}
                   </div>
-                </section>
-              ))
-            )}
-          </main>
-        </>
-      )}
+                ) : (
+                  <div className="rows">
+                    {items.map((r) => (
+                      <ReplayRow
+                        key={r.id}
+                        replay={r}
+                        watched={watched.has(r.id)}
+                        active={selected?.id === r.id}
+                        onOpen={setSelected}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))
+          )}
+        </div>
+
+        <div
+          className="splitter"
+          data-drag={dragging}
+          onPointerDown={startDrag}
+          onDoubleClick={resetWidth}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize the replay list"
+          title="Drag to resize · double-click to reset"
+        />
+
+        <div className="pane pane-right">
+          {selected ? (
+            <PlayerView
+              replay={selected}
+              watched={watched.has(selected.id)}
+              note={notes[selected.id] ?? ''}
+              onToggleWatched={toggleWatched}
+              onNoteChange={setNote}
+            />
+          ) : (
+            <div className="empty">
+              <h3>Pick a replay</h3>
+              <p>Choose any session from the list to start watching.</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {notesOpen && (
         <NotesDrawer
           notes={notes}
           replays={replays}
           onClose={() => setNotesOpen(false)}
-          onOpen={open}
+          onOpen={setSelected}
         />
       )}
     </div>

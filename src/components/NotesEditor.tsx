@@ -37,7 +37,7 @@ export function NotesEditor({ value, onChange }: Props) {
   }, [draft])
 
   return (
-    <div className="panel">
+    <>
       <div className="notes-head">
         <span className="label"><Pencil size={15} /> My notes</span>
         <span className="status">
@@ -50,6 +50,6 @@ export function NotesEditor({ value, onChange }: Props) {
         onChange={(e) => setDraft(e.target.value)}
         placeholder="Write your notes for this replay — key levels, rules, aha-moments…"
       />
-    </div>
+    </>
   )
 }

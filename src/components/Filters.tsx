@@ -103,10 +103,11 @@ export function Filters({ filters, onChange, availableDates, resultCount, totalC
         </button>
       </div>
 
-      <div className="filter-meta">
-        <span><strong>{resultCount}</strong> of {totalCount} replays</span>
-        {dirty && <button className="link-btn" onClick={() => onChange(EMPTY_FILTERS)}>Clear all filters</button>}
-      </div>
+      {dirty && (
+        <button className="link-btn" onClick={() => onChange(EMPTY_FILTERS)}>
+          Clear all ({resultCount}/{totalCount})
+        </button>
+      )}
     </div>
   )
 }
