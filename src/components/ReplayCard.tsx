@@ -45,18 +45,21 @@ export function ReplayCard({ replay, watched, active, onOpen }: Props) {
         ) : (
           <GeneratedThumbnail id={replay.id} title={replay.title} level={replay.level} />
         )}
-        <span className="badge-date">{formatDateBadge(replay.date)}</span>
         <span className="play"><Play size={18} /></span>
         {watched && <span className="badge-watched" title="Watched"><Check size={13} /></span>}
 
-        {/* Real cover art already carries the title and the coaches, so the
-            text overlay is only drawn over generated artwork. */}
-        {!replay.thumbnailUrl && (
-          <div className="card-overlay">
-            <div className="card-title">{replay.title}</div>
-            <div className="card-coach">{coachNames(replay.coachIds)}</div>
-          </div>
-        )}
+        {/* Date, then the title and coach as one label directly beneath it.
+            Real cover art carries its own text, so the label is only drawn
+            over generated artwork. */}
+        <div className="card-stack">
+          <span className="badge-date">{formatDateBadge(replay.date)}</span>
+          {!replay.thumbnailUrl && (
+            <span className="card-label">
+              <span className="card-title">{replay.title}</span>
+              <span className="card-coach">{coachNames(replay.coachIds)}</span>
+            </span>
+          )}
+        </div>
       </div>
     </button>
   )
